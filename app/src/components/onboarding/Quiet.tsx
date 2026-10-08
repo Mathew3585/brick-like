@@ -14,6 +14,7 @@ import { AppIcon, Cta, Label, Text } from '../ui';
 import { Halo } from './Halo';
 import { storyApps } from './Noise';
 import { Reveal, Rise } from './Reveal';
+import { play } from '@/lib/sound';
 
 /** Act 3, in ink: the clock runs, the apps are struck through. */
 export function Quiet({ startedAt, onNext }: { startedAt: number; onNext: () => void }) {
@@ -69,6 +70,7 @@ export function Return({ onNext }: { onNext: (origin: { x: number; y: number }) 
             onPress={(e) => {
               setTouched(true);
               haptic.success();
+              play('unlock');
               const { pageX: x, pageY: y } = e.nativeEvent;
               setTimeout(() => onNext({ x, y }), 520);
             }}

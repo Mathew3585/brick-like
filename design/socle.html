@@ -245,7 +245,8 @@ figure{margin:0}
 .puck-stage::after{content:"";position:absolute;inset:14%;border-radius:50%;box-shadow:inset 0 0 0 1px var(--line)}
 .big-puck{width:58%;aspect-ratio:1;border-radius:50%;position:relative;background:radial-gradient(circle at 35% 30%,#3a3a3d,#111113 55%,#050505);box-shadow:0 40px 70px -30px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.12),inset 0 -8px 20px rgba(0,0,0,.6);transition:transform 1.2s var(--spring)}
 .puck-stage:hover .big-puck{transform:rotate(-12deg) scale(1.02)}
-.big-puck::before{content:"";position:absolute;inset:22%;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),inset 0 2px 6px rgba(0,0,0,.6)}
+.big-puck{container-type:inline-size}
+.big-puck::before{content:"SOCLE";position:absolute;inset:22%;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),inset 0 2px 6px rgba(0,0,0,.6);display:grid;place-items:center;font-family:var(--mono);font-weight:500;font-size:8.5cqw;letter-spacing:.3em;padding-left:.3em;color:rgba(0,0,0,.75);text-shadow:0 1px 0 rgba(255,255,255,.09)}
 .big-puck::after{content:"";position:absolute;width:6px;height:6px;border-radius:50%;background:#f4f4f2;left:50%;top:11%;transform:translateX(-50%);box-shadow:0 0 12px 2px rgba(255,255,255,.5);animation:blink 3s var(--spring) infinite}
 .spec{display:grid;gap:0}
 .spec div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;padding:16px 0;border-top:1px solid var(--line)}

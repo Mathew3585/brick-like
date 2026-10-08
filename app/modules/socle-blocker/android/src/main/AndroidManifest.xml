@@ -25,6 +25,16 @@
         android:resource="@xml/socle_accessibility" />
     </service>
 
+    <service
+      android:name="expo.modules.socleblocker.SocleNotificationListener"
+      android:exported="false"
+      android:label="@string/socle_accessibility_label"
+      android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+      <intent-filter>
+        <action android:name="android.service.notification.NotificationListenerService" />
+      </intent-filter>
+    </service>
+
     <activity
       android:name="expo.modules.socleblocker.ShieldActivity"
       android:exported="false"

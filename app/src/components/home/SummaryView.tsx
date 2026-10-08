@@ -5,6 +5,7 @@ import { appIndex, installedApps } from '@/lib/apps';
 import { useNow } from '@/lib/clock';
 import { history, lastSummary } from '@/lib/data';
 import { duration } from '@/lib/format';
+import { goalLabel } from '@/lib/goal';
 import { focusBetween, startOfDay } from '@/lib/stats';
 import { useStore } from '@/lib/store';
 import { usePalette } from '@/lib/tone';
@@ -25,11 +26,16 @@ export function SummaryView() {
   const total = attempts.reduce((n, [, v]) => n + v, 0);
   const today = focusBetween(past, startOfDay(now), now);
   const top = attempts[0];
+  const muted = Object.entries(record.muted ?? {}).sort((a, b) => b[1] - a[1]);
+  const mutedTotal = muted.reduce((n, [, v]) => n + v, 0);
+  const label = (pkg: string) => index.get(pkg)?.label ?? pkg;
 
   const rows: [string, string][] = [
     ['Mode', record.modeName],
+    ['Objectif', record.goalMin ? `${goalLabel(record.goalMin)} · ${seconds >= record.goalMin * 60 ? 'atteint' : 'pas atteint'}` : 'Libre'],
     ['Ouvertures bloquées', String(total)],
-    ...(top ? ([['La plus tentée', `${index.get(top[0])?.label ?? top[0]} · ${top[1]}`]] as [string, string][]) : []),
+    ...(top ? ([['La plus tentée', `${label(top[0])} · ${top[1]}`]] as [string, string][]) : []),
+    ['Notifications coupées', mutedTotal ? `${mutedTotal} · ${muted.slice(0, 2).map(([k, v]) => `${label(k)} ${v}`).join(', ')}` : '0'],
     ['Déverrouillage', record.how === 'socle' ? 'Au Socle' : "Urgence"],
     ["Focus aujourd'hui", duration(today)],
   ];

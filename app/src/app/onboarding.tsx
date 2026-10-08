@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { ArrowUpRightIcon, CheckIcon, LockIcon } from 'phosphor-react-native';
-import { useEffect, useState } from 'react';
-import { AppState, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { View } from 'react-native';
 import Animated, { FadeIn, FadeOut, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { eclipse } from '@/components/Eclipse';
 import { haptic, PressableScale, settle } from '@/components/motion';
@@ -13,9 +13,10 @@ import { Reveal, Rise } from '@/components/onboarding/Reveal';
 import { Page } from '@/components/Page';
 import { Orb, Radar } from '@/components/Rings';
 import { PairFlow } from '@/components/SocleSetup';
-import { Cta, Muted } from '@/components/ui';
+import { Cta, Muted, Text } from '@/components/ui';
 import { blocker, isSimulated } from '@/lib/blocker';
 import { settings } from '@/lib/data';
+import { usePermissions } from '@/lib/permissions';
 import { ToneOverride, usePalette } from '@/lib/tone';
 import { ink, paper, type Tone } from '@/theme';
 
@@ -47,65 +48,91 @@ function Progress({ step }: { step: number }) {
   );
 }
 
+function PermissionRow({ on, title, detail }: { on: boolean; title: string; detail: string }) {
+  const p = usePalette();
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 13, borderTopWidth: 1, borderTopColor: p.line }}>
+      <View
+        style={{
+          width: 30,
+          height: 30,
+          borderRadius: 15,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: on ? p.fg : 'transparent',
+          borderWidth: on ? 0 : 1,
+          borderColor: p.faint,
+        }}>
+        {on ? <CheckIcon size={15} color={p.bg} weight="bold" /> : null}
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text f="medium" size={15}>
+          {title}
+        </Text>
+        <Muted size={12.5} style={{ marginTop: 2 }}>
+          {detail}
+        </Muted>
+      </View>
+    </View>
+  );
+}
+
 function Permission({ onNext }: { onNext: () => void }) {
   const p = usePalette();
-  const [enabled, setEnabled] = useState(() => isSimulated || blocker.isEnabled());
+  const perms = usePermissions();
+  const apps = isSimulated || perms.blocker;
+  const notify = isSimulated || perms.notify;
+  const done = apps && notify;
 
-  // Back from the system settings: re-read the switch.
+  // A switch just turned on while we were in Settings: say so.
+  const was = useRef(apps && notify);
   useEffect(() => {
-    const sub = AppState.addEventListener('change', (s) => {
-      if (s !== 'active') return;
-      const on = blocker.isEnabled();
-      if (on) haptic.success();
-      setEnabled(on);
-    });
-    return () => sub.remove();
-  }, []);
+    if (done && !was.current) haptic.success();
+    was.current = done;
+  }, [done]);
 
   return (
     <View style={{ flex: 1, justifyContent: 'space-between' }}>
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <View>
-          <Orb size={220} />
+          <Orb size={200} />
           <View
             style={{
               position: 'absolute',
-              right: 40,
-              bottom: 40,
-              width: 48,
-              height: 48,
-              borderRadius: 24,
-              backgroundColor: enabled ? p.fg : p.bg,
-              borderWidth: enabled ? 3 : 1,
-              borderColor: enabled ? p.bg : p.line,
+              right: 34,
+              bottom: 34,
+              width: 46,
+              height: 46,
+              borderRadius: 23,
+              backgroundColor: done ? p.fg : p.bg,
+              borderWidth: done ? 3 : 1,
+              borderColor: done ? p.bg : p.line,
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            {enabled ? <CheckIcon size={22} color={p.bg} weight="bold" /> : <LockIcon size={20} color={p.fg} weight="light" />}
+            {done ? <CheckIcon size={21} color={p.bg} weight="bold" /> : <LockIcon size={19} color={p.fg} weight="light" />}
           </View>
         </View>
       </View>
-      <Reveal
-        key={String(enabled)}
-        delay={150}
-        lines={enabled ? [{ text: 'Blocage' }, { text: 'activé.', muted: true }] : [{ text: 'Une seule' }, { text: 'autorisation.', muted: true }]}
-        size={44}
-      />
-      <Rise delay={600}>
-        <Muted size={15} style={{ marginTop: 12, lineHeight: 22 }}>
-          {enabled ? 'Socle voit quelle app s’ouvre. Rien d’autre.' : 'Accessibilité → Socle → activer. Socle voit quelle app s’ouvre, rien d’autre.'}
-        </Muted>
-        {!enabled ? (
-          <PressableScale onPress={() => blocker.openAppDetails()} style={{ marginTop: 10 }}>
+      <Reveal key={String(done)} delay={150} lines={done ? [{ text: 'Tout est' }, { text: 'prêt.', muted: true }] : [{ text: 'Deux' }, { text: 'autorisations.', muted: true }]} size={44} />
+      <Rise delay={600} style={{ marginTop: 18 }}>
+        <PermissionRow on={apps} title="Bloquer les apps" detail="Accessibilité · voit quelle app s’ouvre, rien d’autre" />
+        <PermissionRow on={notify} title="Couper leurs notifications" detail="Accès aux notifications · seulement pendant une session" />
+        {!done && !isSimulated ? (
+          <PressableScale onPress={() => blocker.openAppDetails()} style={{ marginTop: 8 }}>
             <Muted size={12}>Interrupteur grisé ? Infos de l’app → ⋮ → Autoriser les paramètres restreints.</Muted>
           </PressableScale>
         ) : null}
-        <View style={{ gap: 10, marginTop: 26 }}>
-          {enabled ? (
+        <View style={{ gap: 10, marginTop: 20 }}>
+          {done ? (
             <Cta label="Continuer" icon={<ArrowUpRightIcon size={18} color={p.bg} />} onPress={onNext} />
           ) : (
             <>
-              <Cta label="Activer" icon={<ArrowUpRightIcon size={18} color={p.bg} />} onPress={() => blocker.openSettings()} />
+              <Cta
+                label={apps ? 'Activer les notifications' : 'Activer le blocage'}
+                icon={<ArrowUpRightIcon size={18} color={p.bg} />}
+                onPress={() => (apps ? blocker.openNotifySettings() : blocker.openSettings())}
+              />
               <PressableScale onPress={onNext} style={{ alignSelf: 'center', padding: 8 }}>
                 <Muted>Plus tard</Muted>
               </PressableScale>

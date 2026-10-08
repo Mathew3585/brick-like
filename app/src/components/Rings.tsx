@@ -1,12 +1,12 @@
 import { useEffect, type ReactNode } from 'react';
-import { View } from 'react-native';
+import { View, type GestureResponderEvent } from 'react-native';
 import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withDelay, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import { usePalette } from '@/lib/tone';
-import { SPRING } from './motion';
+import { PressableScale, SPRING } from './motion';
 import { Puck } from './Puck';
 
 /** The Socle on its stage: the puck inside two hairline rings, the outer one breathing. */
-export function Orb({ size = 168 }: { size?: number }) {
+export function Orb({ size = 168, onPress, label }: { size?: number; onPress?: (e: GestureResponderEvent) => void; label?: string }) {
   const p = usePalette();
   const reduced = useReducedMotion();
   const breath = useSharedValue(0);
@@ -31,9 +31,15 @@ export function Orb({ size = 168 }: { size?: number }) {
       <Animated.View style={[ring(0), outer]} />
       <View style={ring(size * 0.14)} />
       {/* The puck's svg is taller than wide (room for its shadow): nudge it so the disc stays centred. */}
-      <View style={{ marginTop: puck * 0.12 }}>
-        <Puck size={puck} />
-      </View>
+      {onPress ? (
+        <PressableScale onPress={onPress} scaleTo={0.94} accessibilityRole="button" accessibilityLabel={label} style={{ marginTop: puck * 0.12 }}>
+          <Puck size={puck} />
+        </PressableScale>
+      ) : (
+        <View style={{ marginTop: puck * 0.12 }}>
+          <Puck size={puck} />
+        </View>
+      )}
     </View>
   );
 }

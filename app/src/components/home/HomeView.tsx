@@ -1,14 +1,14 @@
 import { router } from 'expo-router';
-import { CaretRightIcon, LockIcon } from 'phosphor-react-native';
+import { CaretDownIcon, CheckIcon } from 'phosphor-react-native';
 import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { installedApps, installedOnly } from '@/lib/apps';
-import { useNow } from '@/lib/clock';
 import { blocker } from '@/lib/blocker';
-import { history, modes, settings, socles, startSession } from '@/lib/data';
-import { duration, longDate, plural } from '@/lib/format';
-import { focusBetween, startOfDay, streak } from '@/lib/stats';
+import { modes, settings, socles, startSession } from '@/lib/data';
+import { longDate, plural } from '@/lib/format';
+import { DURATIONS, goalLabel } from '@/lib/goal';
+import { usePermissions } from '@/lib/permissions';
 import { useStore } from '@/lib/store';
 import { usePalette } from '@/lib/tone';
 import { ink } from '@/theme';
@@ -18,27 +18,26 @@ import { Page } from '../Page';
 import { Orb } from '../Rings';
 import { ScanSheet } from '../ScanSheet';
 import { Sheet } from '../Sheet';
-import { Bezel, Chip, Cta, Label, Muted, Pill, Stack, Text, Title } from '../ui';
+import { Cta, Label, Muted, Text } from '../ui';
+import { play } from '@/lib/sound';
 
 type Origin = { x: number; y: number };
 
+/** Monolithe: the date, the Socle, the mode. The puck itself starts the session. */
 export function HomeView() {
   const p = usePalette();
   const allModes = useStore(modes);
   const s = useStore(settings);
   const paired = useStore(socles);
   const apps = useStore(installedApps);
-  const past = useStore(history);
   const [scanning, setScanning] = useState(false);
+  const [picking, setPicking] = useState(false);
+  const [timing, setTiming] = useState(false);
   const [missing, setMissing] = useState<'blocker' | 'socle' | null>(null);
   const [origin, setOrigin] = useState<Origin | undefined>();
 
   const mode = allModes.find((m) => m.id === s.lastModeId) ?? allModes[0];
-  const modeApps = mode ? installedOnly(mode.apps, apps) : [];
-  const now = useNow(60_000);
-  const today = focusBetween(past, startOfDay(now), now);
-  const days = streak(past);
-  const blockerOn = blocker.isEnabled();
+  const { blocker: blockerOn } = usePermissions();
   const hasSocle = paired.length > 0 || s.demo;
 
   const lock = (at: Origin) => {
@@ -53,74 +52,140 @@ export function HomeView() {
     if (!mode) return;
     setTimeout(() => {
       haptic.heavy();
+      play('lock');
       void eclipse(ink, () => startSession(mode, uid), origin);
     }, 260);
   };
 
   return (
-    <Page scroll={false}>
-      <Animated.View entering={enter(0)}>
-        <Muted f="medium" size={13}>
-          {longDate()}
-        </Muted>
-        <Title style={{ marginTop: 6 }}>{'Prêt à te\nconcentrer ?'}</Title>
+    <Page scroll={false} style={{ alignItems: 'center' }}>
+      <Animated.View entering={enter(0)} style={{ alignSelf: 'stretch' }}>
+        <Label>{longDate()}</Label>
       </Animated.View>
 
-      <Animated.View entering={enter(1)} style={{ marginTop: 22, marginHorizontal: -22 }}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 7, paddingHorizontal: 22 }}>
-          {allModes.map((m) => (
-            <Chip key={m.id} label={m.name} selected={m.id === mode?.id} onPress={() => settings.set((v) => ({ ...v, lastModeId: m.id }))} />
-          ))}
-        </ScrollView>
-      </Animated.View>
-
-      {mode ? (
-        <Animated.View entering={enter(2)}>
-          <PressableScale onPress={() => router.push(`/mode/${mode.id}`)} scaleTo={0.985} accessibilityLabel={`Modifier le mode ${mode.name}`}>
-            <Bezel style={{ marginTop: 16 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <View style={{ flex: 1 }}>
-                  <Text f="semibold" size={20}>
-                    {mode.name}
-                  </Text>
-                  <Muted style={{ marginTop: 2 }}>{modeApps.length ? `${plural(modeApps.length, 'app', 'apps')} en pause pendant la session` : 'Aucune app choisie'}</Muted>
-                </View>
-                <CaretRightIcon size={16} color={p.muted} />
-              </View>
-              {modeApps.length ? (
-                <View style={{ marginTop: 14 }}>
-                  <Stack apps={modeApps} />
-                </View>
-              ) : null}
-            </Bezel>
-          </PressableScale>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <Animated.View entering={enter(1)}>
+          <Orb size={290} label="Toucher le Socle pour verrouiller" onPress={(e) => lock({ x: e.nativeEvent.pageX, y: e.nativeEvent.pageY })} />
         </Animated.View>
-      ) : null}
-
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: 150 }}>
-        <Orb />
       </View>
 
-      <Animated.View entering={enter(3)} style={{ gap: 10 }}>
-        {!blockerOn ? (
-          <PressableScale onPress={() => setMissing('blocker')} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-            <Pill solid>À faire</Pill>
-            <Muted>Active le blocage pour que ça marche</Muted>
+      <Animated.View entering={enter(2)} style={{ alignItems: 'center', gap: 10, paddingBottom: 18 }}>
+        {mode ? (
+          <PressableScale
+            onPress={() => setPicking(true)}
+            hapticOnPress="tap"
+            accessibilityLabel={`Mode ${mode.name}, changer`}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 6 }}>
+            <Text f="semibold" size={28}>
+              {mode.name}
+            </Text>
+            <CaretDownIcon size={16} color={p.muted} />
           </PressableScale>
         ) : null}
-        <Cta
-          label="Verrouiller sur le Socle"
-          icon={<LockIcon size={19} color={p.bg} />}
-          disabled={!mode}
-          onPress={(e) => lock({ x: e.nativeEvent.pageX, y: e.nativeEvent.pageY })}
-        />
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Tile value={duration(today)} label="Focus aujourd'hui" />
-          <Tile value={plural(days, 'jour', 'jours')} label="Série en cours" />
-        </View>
+        <PressableScale
+          onPress={() => setTiming(true)}
+          hapticOnPress="tap"
+          accessibilityLabel={`Durée ${goalLabel(s.goalMin)}, changer`}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 99, borderWidth: 1, borderColor: p.line, marginTop: -4 }}>
+          <Text f="mono" size={13}>
+            {goalLabel(s.goalMin)}
+          </Text>
+          <CaretDownIcon size={12} color={p.muted} />
+        </PressableScale>
+        {blockerOn ? (
+          <Muted size={14}>Touche le Socle</Muted>
+        ) : (
+          <PressableScale onPress={() => setMissing('blocker')} style={{ padding: 4 }}>
+            <Muted size={14} style={{ textDecorationLine: 'underline' }}>
+              Active le blocage d’abord
+            </Muted>
+          </PressableScale>
+        )}
       </Animated.View>
 
       <ScanSheet visible={scanning} purpose="lock" onClose={() => setScanning(false)} onTag={onTag} />
+
+      <Sheet visible={picking} onClose={() => setPicking(false)}>
+        <Label>Mode de la session</Label>
+        <View style={{ marginTop: 14 }}>
+          {allModes.map((m) => {
+            const count = installedOnly(m.apps, apps).length;
+            const on = m.id === mode?.id;
+            return (
+              <PressableScale
+                key={m.id}
+                hapticOnPress="tap"
+                scaleTo={0.98}
+                onPress={() => {
+                  settings.set((v) => ({ ...v, lastModeId: m.id }));
+                  setPicking(false);
+                }}
+                style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 14, borderTopWidth: 1, borderTopColor: p.line }}>
+                <View style={{ flex: 1 }}>
+                  <Text f="semibold" size={20}>
+                    {m.name}
+                  </Text>
+                  <Muted size={12.5} style={{ marginTop: 2 }}>
+                    {count ? plural(count, 'app en pause', 'apps en pause') : 'Aucune app choisie'}
+                  </Muted>
+                </View>
+                {on ? (
+                  <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: p.fg, alignItems: 'center', justifyContent: 'center' }}>
+                    <CheckIcon size={14} color={p.bg} weight="bold" />
+                  </View>
+                ) : null}
+              </PressableScale>
+            );
+          })}
+        </View>
+        <Cta
+          variant="ghost"
+          style={{ marginTop: 14 }}
+          label="Gérer les modes"
+          haptics="tap"
+          onPress={() => {
+            setPicking(false);
+            router.navigate('/modes');
+          }}
+        />
+      </Sheet>
+
+      <Sheet visible={timing} onClose={() => setTiming(false)}>
+        <Label>Durée de la session</Label>
+        <Text f="semibold" size={22} style={{ marginTop: 10 }}>
+          Combien de temps ?
+        </Text>
+        <Muted size={14} style={{ marginTop: 8, lineHeight: 20 }}>
+          À la fin, tes apps restent en pause. Une notification te dit de revenir au Socle.
+        </Muted>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 20 }}>
+          {DURATIONS.map((m) => {
+            const on = s.goalMin === m;
+            return (
+              <PressableScale
+                key={m}
+                hapticOnPress="tap"
+                scaleTo={0.94}
+                onPress={() => {
+                  settings.set((v) => ({ ...v, goalMin: m }));
+                  setTiming(false);
+                }}
+                style={{
+                  flexGrow: 1,
+                  minWidth: '30%',
+                  alignItems: 'center',
+                  paddingVertical: 16,
+                  borderRadius: 20,
+                  backgroundColor: on ? p.fg : p.card,
+                }}>
+                <Text f="mono" size={15} color={on ? p.bg : p.fg}>
+                  {goalLabel(m)}
+                </Text>
+              </PressableScale>
+            );
+          })}
+        </View>
+      </Sheet>
 
       <Sheet visible={missing === 'blocker'} onClose={() => setMissing(null)}>
         <Label>Une seule fois</Label>
@@ -168,19 +233,5 @@ export function HomeView() {
         </View>
       </Sheet>
     </Page>
-  );
-}
-
-function Tile({ value, label }: { value: string; label: string }) {
-  const p = usePalette();
-  return (
-    <View style={{ flex: 1, paddingVertical: 12, paddingHorizontal: 15, borderRadius: 20, backgroundColor: p.card }}>
-      <Text f="semibold" size={18} style={{ fontVariant: ['tabular-nums'] }}>
-        {value}
-      </Text>
-      <Muted size={11.5} style={{ marginTop: 2 }}>
-        {label}
-      </Muted>
-    </View>
   );
 }

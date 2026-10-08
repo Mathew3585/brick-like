@@ -23,6 +23,7 @@ import { Orb, Radar } from '../Rings';
 import { AppIcon, Muted } from '../ui';
 import { storyApps } from './Noise';
 import { Reveal, Rise } from './Reveal';
+import { play } from '@/lib/sound';
 
 const PHONE_W = 118;
 const PHONE_H = 232;
@@ -53,6 +54,7 @@ export function Landing({ onNext }: { onNext: (origin: { x: number; y: number })
     if (landed) return;
     setLanded(true);
     haptic.heavy();
+    play('lock');
     dark.set(withTiming(1, { duration: 520, easing: HEAVY }));
     setTimeout(haptic.success, 380);
     setTimeout(() => onNext({ x: win.x + (area?.w ?? 0) / 2, y: win.y + orbCY }), 1100);

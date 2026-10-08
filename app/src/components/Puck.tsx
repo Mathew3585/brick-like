@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { View } from 'react-native';
 import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
-import Svg, { Circle, Defs, Ellipse, LinearGradient, RadialGradient, Stop } from 'react-native-svg';
+import Svg, { Circle, Defs, Ellipse, LinearGradient, RadialGradient, Stop, Text as SvgText } from 'react-native-svg';
+import { font } from '@/theme';
 import { SPRING } from './motion';
 
 /**
@@ -24,6 +25,7 @@ export function Puck({ size, led = true }: { size: number; led?: boolean | 'on' 
 
   const r = size / 2;
   const dot = Math.max(3, size * 0.035);
+  const mark = size * 0.085;
   return (
     <View style={{ width: size, height: size * 1.12 }}>
       <Svg width={size} height={size * 1.12}>
@@ -58,6 +60,17 @@ export function Puck({ size, led = true }: { size: number; led?: boolean | 'on' 
         {/* Recessed inner ring. */}
         <Circle cx={r} cy={r} r={r * 0.56} fill="url(#well)" />
         <Circle cx={r} cy={r} r={r * 0.56} fill="none" stroke="#FFF" strokeOpacity={0.1} strokeWidth={1} />
+        {/* Engraved name: a dark cut with a faint lit lower lip. Too small to read under ~70 px, so left out. */}
+        {size >= 70 ? (
+          <>
+            <SvgText x={r + mark * 0.15} y={r + mark * 0.36 + 0.8} fontFamily={font.monoMedium} fontSize={mark} letterSpacing={mark * 0.3} textAnchor="middle" fill="#FFF" fillOpacity={0.09}>
+              SOCLE
+            </SvgText>
+            <SvgText x={r + mark * 0.15} y={r + mark * 0.36} fontFamily={font.monoMedium} fontSize={mark} letterSpacing={mark * 0.3} textAnchor="middle" fill="#000" fillOpacity={0.75}>
+              SOCLE
+            </SvgText>
+          </>
+        ) : null}
       </Svg>
       {led ? (
         <Animated.View

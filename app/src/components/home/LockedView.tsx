@@ -1,25 +1,33 @@
 import { WaveformIcon } from 'phosphor-react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { installedApps, installedOnly } from '@/lib/apps';
-import { useNow } from '@/lib/clock';
 import { blocker, isSimulated, type InstalledApp } from '@/lib/blocker';
+import { useNow } from '@/lib/clock';
 import { active, endSession, settings, sosLeft } from '@/lib/data';
-import { clock, duration, plural } from '@/lib/format';
+import { clock, plural } from '@/lib/format';
+import { goalLabel } from '@/lib/goal';
 import { useStore } from '@/lib/store';
 import { usePalette } from '@/lib/tone';
 import { paper } from '@/theme';
 import { eclipse } from '../Eclipse';
+import { FocusRing } from '../FocusRing';
 import { HoldButton } from '../HoldButton';
-import { enter, haptic, PressableScale, settle } from '../motion';
+import { enter, haptic, PressableScale } from '../motion';
+import { Halo } from '../onboarding/Halo';
 import { Page } from '../Page';
+import { Puck } from '../Puck';
 import { ScanSheet } from '../ScanSheet';
 import { Sheet } from '../Sheet';
 import { AppIcon, Cta, Label, Muted, Text } from '../ui';
+import { play } from '@/lib/sound';
 
 type Origin = { x: number; y: number };
+const RING = 290;
+const PUCK = 158;
 
+/** Monolithe in ink: the puck inside the ring that fills toward the target, the clock under it. */
 export function LockedView() {
   const p = usePalette();
   const session = useStore(active);
@@ -30,74 +38,68 @@ export function LockedView() {
   const [sos, setSos] = useState(false);
   const [shield, setShield] = useState<InstalledApp | null>(null);
   const [origin, setOrigin] = useState<Origin | undefined>();
-  const progress = useSharedValue(0);
 
   const elapsed = session ? Math.max(0, Math.floor((now - session.startedAt) / 1000)) : 0;
-  const goal = s.goalMin * 60;
-  const pct = Math.min(1, elapsed / goal);
-  useEffect(() => {
-    progress.set(withTiming(pct, settle(900)));
-  }, [pct, progress]);
-  const bar = useAnimatedStyle(() => ({ width: `${progress.get() * 100}%` }));
-
+  const goalMin = session?.goalMin ?? 0;
+  const progress = goalMin ? elapsed / (goalMin * 60) : null;
+  const reached = progress != null && progress >= 1;
   const paused = session ? installedOnly(session.blocked, apps) : [];
   const left = sosLeft(s);
+
+  // One buzz when the ring closes while the app is open (the notification covers the rest).
+  const wasReached = useRef(reached);
+  useEffect(() => {
+    if (reached && !wasReached.current) haptic.success();
+    wasReached.current = reached;
+  }, [reached]);
 
   const unlock = (how: 'socle' | 'sos', uid?: string) => {
     setScanning(false);
     setSos(false);
     setTimeout(() => {
       haptic.heavy();
+      play('unlock');
       void eclipse(paper, () => endSession(how, uid), origin);
     }, 280);
   };
 
   return (
-    <Page scroll={false} tabBar={false} style={{ justifyContent: 'space-between' }}>
-      <Animated.View entering={enter(0)} style={{ marginTop: 26 }}>
-        <Label>Verrouillé · {session?.modeName}</Label>
-        <Text f="monoLight" size={60} style={{ marginTop: 14, letterSpacing: -3.6, fontVariant: ['tabular-nums'] }}>
-          {clock(elapsed)}
-        </Text>
-        <View style={{ marginTop: 18, height: 2, borderRadius: 2, backgroundColor: p.line, overflow: 'hidden' }}>
-          <Animated.View style={[{ height: '100%', backgroundColor: p.fg }, bar]} />
-        </View>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 9 }}>
-          <Label>Objectif {duration(goal)}</Label>
-          <Label>{Math.floor(pct * 100)} %</Label>
-        </View>
+    <Page scroll={false} tabBar={false} style={{ alignItems: 'center' }}>
+      <Animated.View entering={enter(0)} style={{ alignSelf: 'stretch', flexDirection: 'row', justifyContent: 'space-between' }}>
+        <Label>Session · {session?.modeName}</Label>
+        <PressableScale
+          disabled={!isSimulated || paused.length === 0}
+          onPress={() => {
+            const a = paused[0];
+            if (!a) return;
+            blocker.simulateAttempt(a.packageName);
+            haptic.warn();
+            setShield(a);
+          }}>
+          <Label>{plural(paused.length, 'app en pause', 'apps en pause')}</Label>
+        </PressableScale>
       </Animated.View>
 
-      <Animated.View entering={enter(1)}>
-        <Label style={{ marginBottom: 14 }}>{paused.length ? `${plural(paused.length, 'app', 'apps')} en pause` : 'Aucune app en pause'}</Label>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: 16 }}>
-          {paused.slice(0, 8).map((a) => (
-            <PressableScale
-              key={a.packageName}
-              disabled={!isSimulated}
-              onPress={() => {
-                blocker.simulateAttempt(a.packageName);
-                haptic.warn();
-                setShield(a);
-              }}
-              style={{ width: '25%', alignItems: 'center', gap: 7 }}>
-              <View style={{ opacity: 0.45 }}>
-                <AppIcon label={a.label} icon={a.icon} size={48} />
-                <View style={{ position: 'absolute', left: 8, right: 8, top: 23.5, height: 1, backgroundColor: p.fg, transform: [{ rotate: '-35deg' }] }} />
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <Animated.View entering={enter(1)} style={{ alignItems: 'center' }}>
+          <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+            <Halo size={RING * 1.4} strength={reached ? 0.14 : 0.08} />
+            <FocusRing size={RING} progress={progress}>
+              <View style={{ marginTop: PUCK * 0.12 }}>
+                <Puck size={PUCK} led={reached ? true : 'on'} />
               </View>
-              <Muted size={10.5} numberOfLines={1}>
-                {a.label}
-              </Muted>
-            </PressableScale>
-          ))}
-        </View>
-        {paused.length > 8 ? <Muted style={{ marginTop: 12 }}>et {paused.length - 8} autres</Muted> : null}
-      </Animated.View>
+            </FocusRing>
+          </View>
+          <Text f="monoLight" size={48} style={{ marginTop: 26, letterSpacing: -2.8, fontVariant: ['tabular-nums'] }}>
+            {clock(elapsed)}
+          </Text>
+          <Muted size={14} style={{ marginTop: 6 }}>
+            {progress == null ? 'Session libre' : reached ? 'Objectif atteint · repose ton téléphone' : `sur ${goalLabel(goalMin)}`}
+          </Muted>
+        </Animated.View>
+      </View>
 
-      <Animated.View entering={enter(2)}>
-        <Muted size={14} style={{ textAlign: 'center', marginBottom: 16, lineHeight: 20 }}>
-          Pour tout récupérer, repose ton téléphone sur le Socle.
-        </Muted>
+      <Animated.View entering={enter(2)} style={{ alignSelf: 'stretch' }}>
         <Cta
           label="Débloquer au Socle"
           icon={<WaveformIcon size={19} color={p.bg} weight="light" />}
@@ -108,7 +110,7 @@ export function LockedView() {
         />
         <PressableScale onPress={() => (left > 0 ? setSos(true) : undefined)} disabled={left <= 0} style={{ alignSelf: 'center', marginTop: 14, padding: 6 }}>
           <Muted size={12.5} style={{ textDecorationLine: left > 0 ? 'underline' : 'none' }}>
-            {left > 0 ? `Déblocage d'urgence · ${left} restant${left > 1 ? 's' : ''}` : "Plus de déblocage d'urgence ce mois-ci"}
+            {left > 0 ? `Déblocage d’urgence · ${left} restant${left > 1 ? 's' : ''}` : 'Plus de déblocage d’urgence ce mois-ci'}
           </Muted>
         </PressableScale>
       </Animated.View>
@@ -121,7 +123,7 @@ export function LockedView() {
           Débloquer sans le Socle ?
         </Text>
         <Muted size={14} style={{ marginTop: 8, lineHeight: 20 }}>
-          {`Il t'en restera ${left - 1} ce mois-ci. La session ne comptera pas dans ta série.`}
+          {`Il t’en restera ${left - 1} ce mois-ci. La session ne comptera pas dans ta série.`}
         </Muted>
         <View style={{ marginTop: 22, gap: 6 }}>
           <HoldButton label="Maintiens pour débloquer" onConfirm={() => unlock('sos')} />

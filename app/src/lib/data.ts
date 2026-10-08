@@ -1,4 +1,5 @@
 import { blocker } from './blocker';
+import { cancelGoal, scheduleGoal } from './goal';
 import { createPersistedStore } from './persist';
 import { createStore } from './store';
 
@@ -12,16 +13,23 @@ export type SessionRecord = {
   endedAt: number;
   attempts: Record<string, number>;
   how: 'socle' | 'sos';
+  /** Notifications from paused apps removed during the session, per app. */
+  muted?: Record<string, number>;
+  /** Target in minutes, 0 for Libre. Missing on sessions saved before targets existed. */
+  goalMin?: number;
 };
-export type ActiveSession = { modeId: string; modeName: string; startedAt: number; blocked: string[] };
+export type ActiveSession = { modeId: string; modeName: string; startedAt: number; blocked: string[]; goalMin?: number };
 export type Settings = {
   onboarded: boolean;
   /** Lets the "Socle virtuel" unlock, for testing without an NFC tag. */
   demo: boolean;
+  /** Length of the next session in minutes, 0 for Libre. */
   goalMin: number;
   sosMonth: string;
   sosUsed: number;
   lastModeId: string;
+  /** Lock and unlock sounds (always quiet in silent mode). */
+  sounds?: boolean;
 };
 
 export const SOS_PER_MONTH = 3;
@@ -43,7 +51,7 @@ export const active = createPersistedStore<ActiveSession | null>('socle.active',
 export const settings = createPersistedStore<Settings>('socle.settings', {
   onboarded: false,
   demo: false,
-  goalMin: 90,
+  goalMin: 50,
   sosMonth: '',
   sosUsed: 0,
   lastModeId: 'travail',
@@ -65,7 +73,7 @@ export function reconcile() {
   const native = blocker.current();
   const mine = active.get();
   if (native && !mine) {
-    active.set({ modeId: settings.get().lastModeId, modeName: native.mode, startedAt: native.startedAt, blocked: native.blocked });
+    active.set({ modeId: settings.get().lastModeId, modeName: native.mode, startedAt: native.startedAt, blocked: native.blocked, goalMin: settings.get().goalMin });
   } else if (!native && mine) {
     active.set(null);
   }
@@ -95,15 +103,18 @@ function touchSocle(tag: string) {
 
 export function startSession(mode: Mode, tag: string) {
   const startedAt = Date.now();
+  const goalMin = settings.get().goalMin;
   blocker.start(mode.name, mode.apps, startedAt);
-  active.set({ modeId: mode.id, modeName: mode.name, startedAt, blocked: mode.apps });
+  active.set({ modeId: mode.id, modeName: mode.name, startedAt, blocked: mode.apps, goalMin });
+  void scheduleGoal(goalMin, mode.name);
   settings.set((s) => ({ ...s, lastModeId: mode.id }));
   touchSocle(tag);
 }
 
 export function endSession(how: SessionRecord['how'], tag?: string) {
   const current = active.get();
-  const attempts = blocker.stop();
+  const { attempts, muted } = blocker.stop();
+  cancelGoal();
   active.set(null);
   if (!current) return;
   const record: SessionRecord = {
@@ -113,7 +124,9 @@ export function endSession(how: SessionRecord['how'], tag?: string) {
     startedAt: current.startedAt,
     endedAt: Date.now(),
     attempts,
+    muted,
     how,
+    goalMin: current.goalMin ?? 0,
   };
   history.set((list) => [...list, record]);
   if (how === 'sos') {

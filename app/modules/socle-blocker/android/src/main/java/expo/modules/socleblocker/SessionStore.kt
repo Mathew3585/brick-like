@@ -38,29 +38,40 @@ object SessionStore {
       .putString("mode", mode)
       .putStringSet("blocked", HashSet(blocked))
       .putString("attempts", "{}")
+      .putString("muted", "{}")
       .commit()
   }
 
-  /** Ends the session and returns how many times each blocked app was opened. */
-  fun stop(context: Context): Map<String, Int> {
-    val attempts = attempts(context)
+  /** Ends the session; returns per app how many times it was opened and how many notifications were cut. */
+  fun stop(context: Context): Map<String, Map<String, Int>> {
+    val result = mapOf("attempts" to counts(context, "attempts"), "muted" to counts(context, "muted"))
     prefs(context).edit()
       .putBoolean("active", false)
       .putStringSet("blocked", emptySet())
       .putString("attempts", "{}")
+      .putString("muted", "{}")
       .commit()
-    return attempts
+    return result
   }
 
-  fun attempts(context: Context): Map<String, Int> {
-    val json = JSONObject(prefs(context).getString("attempts", "{}") ?: "{}")
+  fun attempts(context: Context) = counts(context, "attempts")
+
+  fun muted(context: Context) = counts(context, "muted")
+
+  private fun counts(context: Context, key: String): Map<String, Int> {
+    val json = JSONObject(prefs(context).getString(key, "{}") ?: "{}")
     return json.keys().asSequence().associateWith { json.optInt(it) }
   }
 
-  fun recordAttempt(context: Context, pkg: String) {
+  fun recordAttempt(context: Context, pkg: String) = increment(context, "attempts", pkg)
+
+  fun recordMuted(context: Context, pkg: String) = increment(context, "muted", pkg)
+
+  @Synchronized
+  private fun increment(context: Context, key: String, pkg: String) {
     val p = prefs(context)
-    val json = JSONObject(p.getString("attempts", "{}") ?: "{}")
+    val json = JSONObject(p.getString(key, "{}") ?: "{}")
     json.put(pkg, json.optInt(pkg) + 1)
-    p.edit().putString("attempts", json.toString()).apply()
+    p.edit().putString(key, json.toString()).commit()
   }
 }

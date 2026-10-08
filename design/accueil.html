@@ -1,0 +1,464 @@
+<title>Socle · Accueil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@300;400;500&display=swap">
+<style>
+/* Layout: a contact sheet. Six phones in a grid, one idea each, all built around the puck. */
+:root{
+  --bg:#0b0b0c; --fg:#f2f2f0; --muted:#8b8b90; --line:rgba(255,255,255,.08);
+  --surface:#131315; --surface-2:#1a1a1d; --bezel:#1d1d20; --bezel-edge:rgba(255,255,255,.14);
+  --ink:#0a0a0a; --paper:#fafaf9;
+  --display:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --spring:cubic-bezier(.32,.72,0,1); --heavy:cubic-bezier(.7,0,.2,1);
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){--bg:#f3f3f1;--fg:#0b0b0c;--muted:#6c6c71;--line:rgba(0,0,0,.08);--surface:#fff;--surface-2:#ebebe8;--bezel:#151517;--bezel-edge:rgba(0,0,0,.25);color-scheme:light}
+}
+:root[data-theme="light"]{--bg:#f3f3f1;--fg:#0b0b0c;--muted:#6c6c71;--line:rgba(0,0,0,.08);--surface:#fff;--surface-2:#ebebe8;--bezel:#151517;--bezel-edge:rgba(0,0,0,.25);color-scheme:light}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--display);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;padding-inline:clamp(16px,4vw,56px);overflow-x:hidden}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+button:focus-visible{outline:2px solid currentColor;outline-offset:3px;border-radius:999px}
+.wrap{max-width:1280px;margin-inline:auto}
+
+header.top{display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;padding-block:clamp(40px,7vw,88px) clamp(32px,5vw,56px)}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--fg)}
+h1{font-size:clamp(40px,6vw,80px);line-height:.95;letter-spacing:-.055em;font-weight:600;margin:16px 0 0;text-wrap:balance}
+h1 span{color:var(--muted);font-weight:300}
+.intro{color:var(--muted);max-width:28em;margin:0}
+.switch{display:inline-flex;padding:4px;border-radius:999px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);margin-top:20px}
+.switch button{padding:9px 16px;border-radius:999px;font-size:13px;font-weight:500;color:var(--muted);transition:background .5s var(--spring),color .5s var(--spring)}
+.switch button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:64px 28px;padding-bottom:96px}
+figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:22px}
+figcaption{width:100%;max-width:300px}
+figcaption .h{display:flex;align-items:center;gap:10px}
+figcaption .tag{font-family:var(--mono);font-size:11px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--fg);color:var(--bg)}
+figcaption b{font-weight:600;font-size:18px;letter-spacing:-.02em}
+figcaption p{margin:8px 0 0;color:var(--muted);font-size:14px;line-height:1.45}
+figcaption .try{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:10px;display:block}
+
+/* ---------- phone ---------- */
+.phone{width:300px;aspect-ratio:300/650;border-radius:50px;padding:9px;background:var(--bezel);box-shadow:inset 0 0 0 1px var(--bezel-edge),0 40px 80px -34px rgba(0,0,0,.55);flex:none;max-width:100%}
+.scr{--s-bg:var(--paper);--s-fg:var(--ink);--s-mute:#8a8a8f;--s-faint:#c4c4c7;--s-line:rgba(0,0,0,.08);--s-card:#f0f0ee;
+  position:relative;height:100%;border-radius:41px;overflow:hidden;background:var(--s-bg);color:var(--s-fg);font-size:13px;line-height:1.35;isolation:isolate;user-select:none;-webkit-user-select:none}
+.scr[data-state="locked"]{--s-bg:#050505;--s-fg:#f4f4f2;--s-mute:#77777c;--s-faint:#3a3a3e;--s-line:rgba(255,255,255,.09);--s-card:#121214}
+.scr[data-state="free"] .on-lock,.scr[data-state="locked"] .on-free{display:none!important}
+.sb{position:absolute;top:0;left:0;right:0;height:42px;display:flex;justify-content:space-between;align-items:center;padding:2px 26px 0 28px;font-size:12px;font-weight:600;z-index:5}
+.sb i{display:flex;gap:4px;align-items:center}
+.sb i span{width:15px;height:8px;border-radius:2.5px;box-shadow:inset 0 0 0 1px var(--s-fg);opacity:.5}
+.sb i span:first-child{width:12px;opacity:.9;box-shadow:none;background:var(--s-fg);height:7px}
+.isl{position:absolute;top:10px;left:50%;translate:-50% 0;width:88px;height:26px;border-radius:16px;background:#000;z-index:6}
+.body{position:absolute;inset:0;padding:54px 20px 22px;display:flex;flex-direction:column}
+.ecl{position:absolute;inset:0;z-index:20;pointer-events:none;clip-path:circle(0 at 50% 50%)}
+.ecl.run{transition:clip-path .9s var(--heavy)}
+.ecl.fade{transition:opacity .45s var(--spring);opacity:0}
+
+/* atoms */
+.lbl{font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--s-mute)}
+.mute{color:var(--s-mute)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.timer{font-family:var(--mono);font-weight:300;letter-spacing:-.06em;font-variant-numeric:tabular-nums}
+.press{transition:transform .5s var(--spring)}
+.press:active{transform:scale(.96)}
+.apps{display:flex}
+.app{width:24px;height:24px;border-radius:7.5px;background:var(--s-fg);color:var(--s-bg);display:grid;place-items:center;font-size:9px;font-weight:600;letter-spacing:-.02em;box-shadow:0 0 0 2px var(--s-bg);margin-left:-5px}
+.app:first-child{margin-left:0}
+.app.g1{background:#4a4a4e;color:#f4f4f2}.app.g2{background:#8a8a8f;color:#0a0a0a}.app.g3{background:#d9d9d6;color:#0a0a0a}
+.scr[data-state="locked"] .app{opacity:.45}
+
+/* the puck, same recipe as the app */
+.puck{--p:120px;width:var(--p);height:var(--p);border-radius:50%;position:relative;flex:none;
+  background:radial-gradient(circle at 35% 30%,#3a3a3d,#111113 55%,#050505);
+  box-shadow:0 calc(var(--p)*.22) calc(var(--p)*.36) calc(var(--p)*-.16) rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.12),inset 0 calc(var(--p)*-.06) calc(var(--p)*.16) rgba(0,0,0,.6);
+  transition:transform .6s var(--spring)}
+.puck::before{content:"";position:absolute;inset:22%;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),inset 0 2px 6px rgba(0,0,0,.6)}
+.puck::after{content:"";position:absolute;width:calc(var(--p)*.035 + 1px);height:calc(var(--p)*.035 + 1px);border-radius:50%;background:#f4f4f2;left:50%;top:11%;translate:-50% 0;box-shadow:0 0 calc(var(--p)*.08) 1px rgba(255,255,255,.55);animation:led 3s var(--spring) infinite}
+.scr[data-state="locked"] .puck::after{animation:none;opacity:1}
+.scr[data-state="locked"] .halo{opacity:1}
+.halo{position:absolute;border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,255,.1),transparent);opacity:0;transition:opacity .8s;pointer-events:none}
+@keyframes led{0%,100%{opacity:1}50%{opacity:.25}}
+button.puck:active{transform:scale(.95)}
+.rings{position:relative;display:grid;place-items:center}
+.rings::before,.rings::after{content:"";position:absolute;border-radius:50%;box-shadow:inset 0 0 0 1px var(--s-line)}
+.rings::before{inset:0;animation:breathe 4.8s var(--spring) infinite}
+.rings::after{inset:14%}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.04);opacity:.5}}
+
+/* ---------- A · Monolithe ---------- */
+.va .body{align-items:center;text-align:center}
+.va .top{width:100%;display:flex;justify-content:space-between;align-items:center}
+.va .dots{display:flex;gap:3px;padding:8px}
+.va .dots i{width:4px;height:4px;border-radius:50%;background:var(--s-fg)}
+.va .stage{flex:1;display:grid;place-items:center;position:relative}
+.va .mode{font-size:22px;font-weight:600;letter-spacing:-.035em;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px}
+.va .mode svg{opacity:.5}
+.va .foot{font-size:12.5px;padding-bottom:8px}
+
+/* ---------- B · Manifeste ---------- */
+.vb .tabs{display:flex;gap:16px;font-size:12px;font-weight:500}
+.vb .tabs span{color:var(--s-mute)}
+.vb .tabs span:first-child{color:var(--s-fg)}
+.vb .hero{margin-top:auto}
+.vb .big{font-size:64px;font-weight:600;letter-spacing:-.065em;line-height:.9}
+.vb .big.thin{font-weight:300;color:var(--s-mute)}
+.vb .sub{margin-top:12px;font-size:14px}
+.vb .row{display:flex;align-items:center;justify-content:space-between;margin-top:34px;gap:12px}
+.vb .go{flex:1;display:flex;align-items:center;justify-content:space-between;padding:6px 6px 6px 20px;border-radius:999px;background:var(--s-fg);color:var(--s-bg);font-weight:500;font-size:14px}
+.vb .go i{width:36px;height:36px;border-radius:50%;background:rgba(128,128,128,.22);display:grid;place-items:center;font-style:normal}
+
+/* ---------- C · Cadran ---------- */
+.vc .body{align-items:center}
+.vc .stage{flex:1;display:grid;place-items:center;position:relative;width:100%}
+.vc svg.arc{position:absolute;width:236px;height:236px;rotate:-90deg}
+.vc .arc circle{fill:none;stroke-width:2}
+.vc .arc .track{stroke:var(--s-line)}
+.vc .arc .val{stroke:var(--s-fg);stroke-linecap:round;transition:stroke-dashoffset 1s var(--spring)}
+.vc .read{position:absolute;top:calc(50% + 92px);text-align:center}
+.vc .head{text-align:center;margin-top:18px}
+.vc .head .n{font-size:30px;font-weight:600;letter-spacing:-.05em}
+.vc .picker{display:flex;align-items:center;gap:14px;font-size:15px;font-weight:500;padding:8px 0 10px}
+.vc .picker button{width:30px;height:30px;border-radius:50%;box-shadow:inset 0 0 0 1px var(--s-line);display:grid;place-items:center;color:var(--s-mute)}
+.vc .nav{display:flex;gap:28px;justify-content:center;padding-top:12px;border-top:1px solid var(--s-line);width:100%}
+.vc .nav span{width:5px;height:5px;border-radius:50%;background:var(--s-faint)}
+.vc .nav span:first-child{background:var(--s-fg)}
+
+/* ---------- D · Glisser ---------- */
+.vd .head{display:flex;justify-content:space-between;align-items:flex-start}
+.vd .mode{font-size:26px;font-weight:600;letter-spacing:-.045em}
+.vd .me{width:30px;height:30px;border-radius:50%;background:var(--s-card);display:grid;place-items:center}
+.vd .void{flex:1;display:grid;place-items:center}
+.vd .void .rings{width:190px;height:190px}
+.vd .void .ghost{width:88px;height:88px;border-radius:50%;box-shadow:inset 0 0 0 1px var(--s-line);display:grid;place-items:center;color:var(--s-mute);font-family:var(--mono);font-size:9px;letter-spacing:.12em}
+.track{position:relative;height:72px;border-radius:999px;background:var(--s-card);box-shadow:inset 0 0 0 1px var(--s-line);display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none}
+.track .t{font-size:13px;color:var(--s-mute);padding-left:40px;background:linear-gradient(90deg,var(--s-mute) 0%,var(--s-fg) 50%,var(--s-mute) 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 2.6s linear infinite}
+@keyframes shine{from{background-position:100% 0}to{background-position:-100% 0}}
+.track .knob{position:absolute;left:6px;top:6px;cursor:grab}
+.track .knob.back{transition:translate .5s var(--spring)}
+.track .knob .puck{--p:60px}
+
+/* ---------- E · Cartes ---------- */
+.ve .deck{position:relative;height:250px;margin-top:22px}
+.card{position:absolute;left:0;right:0;top:0;height:210px;border-radius:28px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;transition:transform .7s var(--spring),opacity .7s var(--spring),background .4s;cursor:pointer}
+.card[data-pos="0"]{background:var(--s-fg);color:var(--s-bg);z-index:3;transform:translateY(40px)}
+.card[data-pos="1"]{background:var(--s-card);z-index:2;transform:translateY(20px) scale(.94)}
+.card[data-pos="2"]{background:var(--s-card);z-index:1;transform:translateY(0) scale(.88);opacity:.7}
+.card .nm{font-size:24px;font-weight:600;letter-spacing:-.04em}
+.card .ct{font-family:var(--mono);font-size:10.5px;opacity:.6}
+.card[data-pos="0"] .app{box-shadow:0 0 0 2px var(--s-fg)}
+.ve .bottom{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:12px}
+.ve .links{display:flex;gap:18px;font-size:11.5px;color:var(--s-mute)}
+
+/* ---------- F · Chiffre ---------- */
+.vf .hero{margin-top:auto;margin-bottom:auto}
+.vf .num{font-family:var(--mono);font-weight:300;font-size:86px;letter-spacing:-.08em;line-height:.9;font-variant-numeric:tabular-nums}
+.vf .meta{display:flex;gap:16px;margin-top:14px;font-size:12.5px}
+.vf .meta b{font-weight:500}
+.vf .launch{display:flex;align-items:center;gap:14px;padding:10px 10px 10px 10px;border-radius:30px;background:var(--s-card)}
+.vf .launch .t{flex:1}
+.vf .launch .t b{display:block;font-size:15px;font-weight:600;letter-spacing:-.02em}
+.vf .island{display:flex;justify-content:center;gap:6px;margin-top:14px}
+.vf .island span{width:36px;height:4px;border-radius:2px;background:var(--s-line)}
+.vf .island span:first-child{background:var(--s-fg)}
+
+footer{padding-block:40px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+@media (max-width:360px){.phone{zoom:.9}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <span class="eyebrow">Socle · accueil v2</span>
+      <h1>Six accueils.<br><span>Un seul palet.</span></h1>
+    </div>
+    <div>
+      <p class="intro">Chaque piste garde une seule action visible. Touche le palet, le bouton ou glisse pour lancer une session, puis touche à nouveau pour la finir.</p>
+      <div class="switch" role="group" aria-label="État de tous les écrans">
+        <button id="allFree" aria-pressed="true">Tous libres</button>
+        <button id="allLocked" aria-pressed="false">Tous en session</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="grid">
+
+    <!-- A -->
+    <figure>
+      <div class="phone"><div class="scr va" data-state="free">
+        <div class="sb"><span>9:41</span><i><span></span><span></span></i></div><div class="isl"></div>
+        <div class="body">
+          <div class="top"><span class="lbl on-free">Jeudi 8 octobre</span><span class="lbl on-lock">En session</span><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span></div>
+          <div class="stage">
+            <div class="halo" style="width:300px;height:300px"></div>
+            <div class="rings" style="width:250px;height:250px"><button class="puck" style="--p:150px" data-toggle aria-label="Toucher le Socle"></button></div>
+          </div>
+          <button class="mode on-free" data-cycle><span data-name>Travail</span><svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+          <div class="timer on-lock" style="font-size:44px" data-timer>00:00:00</div>
+          <p class="foot mute on-free">Touche le Socle</p>
+          <p class="foot mute on-lock">Repose-le pour tout récupérer</p>
+        </div>
+        <div class="ecl"></div>
+      </div></div>
+      <figcaption><div class="h"><span class="tag">A</span><b>Monolithe</b></div>
+        <p>Le palet, le nom du mode, rien d'autre. Le palet lui-même est le bouton. Modes, stats et Socles passent derrière les trois points.</p>
+        <span class="try">Touche le palet · touche « Travail » pour changer</span></figcaption>
+    </figure>
+
+    <!-- B -->
+    <figure>
+      <div class="phone"><div class="scr vb" data-state="free">
+        <div class="sb"><span>9:41</span><i><span></span><span></span></i></div><div class="isl"></div>
+        <div class="body">
+          <div class="tabs on-free"><span>Accueil</span><span>Modes</span><span>Stats</span><span>Socles</span></div>
+          <span class="lbl on-lock">Session · <span data-name>Travail</span></span>
+          <div class="hero">
+            <div class="on-free">
+              <button class="big" data-cycle><span data-name>Travail</span>.</button>
+              <div class="sub mute"><span data-count>10</span> apps se tairont.</div>
+            </div>
+            <div class="on-lock">
+              <div class="big">Silence.</div>
+              <div class="timer" style="font-size:34px;margin-top:14px" data-timer>00:00:00</div>
+            </div>
+            <div class="apps" style="margin-top:22px" data-apps></div>
+            <div class="row">
+              <span class="puck" style="--p:58px" aria-hidden="true"></span>
+              <button class="go press" data-toggle><span class="on-free">Verrouiller</span><span class="on-lock">Débloquer au Socle</span><i>→</i></button>
+            </div>
+          </div>
+        </div>
+        <div class="ecl"></div>
+      </div></div>
+      <figcaption><div class="h"><span class="tag">B</span><b>Manifeste</b></div>
+        <p>Le mode écrit en très grand, comme une décision. Un seul bouton, le palet posé à côté. Les onglets deviennent du texte en haut.</p>
+        <span class="try">Touche « Travail. » · touche Verrouiller</span></figcaption>
+    </figure>
+
+    <!-- C -->
+    <figure>
+      <div class="phone"><div class="scr vc" data-state="free">
+        <div class="sb"><span>9:41</span><i><span></span><span></span></i></div><div class="isl"></div>
+        <div class="body">
+          <div class="head">
+            <div class="n on-free mono">2 h 14</div><div class="n on-lock timer" data-timer>00:00:00</div>
+            <div class="lbl on-free" style="margin-top:4px">Focus aujourd'hui · objectif 3 h</div>
+            <div class="lbl on-lock" style="margin-top:4px">Session · objectif 1 h 30</div>
+          </div>
+          <div class="stage">
+            <div class="halo" style="width:300px;height:300px"></div>
+            <svg class="arc" viewBox="0 0 236 236" aria-hidden="true"><circle class="track" cx="118" cy="118" r="114"/><circle class="val" cx="118" cy="118" r="114" data-arc/></svg>
+            <button class="puck" style="--p:140px" data-toggle aria-label="Toucher le Socle"></button>
+          </div>
+          <div class="picker on-free"><button data-cycle-prev aria-label="Mode précédent">‹</button><span data-name>Travail</span><button data-cycle aria-label="Mode suivant">›</button></div>
+          <div class="picker on-lock mute" style="font-size:13px">Touche le palet pour finir</div>
+          <div class="nav" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+        </div>
+        <div class="ecl"></div>
+      </div></div>
+      <figcaption><div class="h"><span class="tag">C</span><b>Cadran</b></div>
+        <p>Le palet au centre d'un anneau qui se remplit avec ton focus du jour. En session, l'anneau suit l'objectif. Le mode se choisit avec les flèches.</p>
+        <span class="try">Touche le palet · flèches pour le mode</span></figcaption>
+    </figure>
+
+    <!-- D -->
+    <figure>
+      <div class="phone"><div class="scr vd" data-state="free">
+        <div class="sb"><span>9:41</span><i><span></span><span></span></i></div><div class="isl"></div>
+        <div class="body">
+          <div class="head">
+            <div>
+              <button class="mode" data-cycle><span data-name>Travail</span></button>
+              <div class="apps" style="margin-top:12px" data-apps></div>
+            </div>
+            <span class="me" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="5" r="2.5" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M2.5 12.5c.8-2.2 2.5-3.2 4.5-3.2s3.7 1 4.5 3.2" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></span>
+          </div>
+          <div class="void">
+            <div class="rings"><div class="halo" style="width:240px;height:240px"></div><span class="ghost on-free">SOCLE</span><span class="timer on-lock" style="font-size:30px" data-timer>00:00:00</span></div>
+          </div>
+          <div class="track" data-slider>
+            <span class="t on-free">Glisse jusqu'au Socle</span><span class="t on-lock">Glisse pour finir</span>
+            <span class="knob"><span class="puck"></span></span>
+          </div>
+        </div>
+        <div class="ecl"></div>
+      </div></div>
+      <figcaption><div class="h"><span class="tag">D</span><b>Glisser</b></div>
+        <p>Un clin d'œil au « glisser pour déverrouiller ». Le palet est la poignée et l'écran reste vide. Le geste prépare la session ; la vraie puce la lance.</p>
+        <span class="try">Fais glisser le palet vers la droite</span></figcaption>
+    </figure>
+
+    <!-- E -->
+    <figure>
+      <div class="phone"><div class="scr ve" data-state="free">
+        <div class="sb"><span>9:41</span><i><span></span><span></span></i></div><div class="isl"></div>
+        <div class="body">
+          <span class="lbl on-free">Choisis ton mode</span><span class="lbl on-lock">En session</span>
+          <div class="deck" data-deck>
+            <div class="card" data-pos="0" data-mode="0"><div><div class="nm">Travail</div><div class="ct on-free">10 apps</div><div class="timer on-lock" style="font-size:26px;margin-top:6px" data-timer>00:00:00</div></div><div class="apps" data-apps-of="0"></div></div>
+            <div class="card" data-pos="1" data-mode="1"><div><div class="nm">Lecture</div><div class="ct">14 apps</div></div><div class="apps" data-apps-of="1"></div></div>
+            <div class="card" data-pos="2" data-mode="2"><div><div class="nm">Soir</div><div class="ct">8 apps</div></div><div class="apps" data-apps-of="2"></div></div>
+          </div>
+          <div class="bottom">
+            <div class="halo" style="width:220px;height:220px;margin-top:-30px"></div>
+            <button class="puck" style="--p:96px" data-toggle aria-label="Toucher le Socle"></button>
+            <span class="mute on-free" style="font-size:12px">Touche le Socle</span><span class="mute on-lock" style="font-size:12px">Repose-le pour finir</span>
+            <div class="links on-free"><span>Stats</span><span>Socles</span></div>
+          </div>
+        </div>
+        <div class="ecl"></div>
+      </div></div>
+      <figcaption><div class="h"><span class="tag">E</span><b>Cartes</b></div>
+        <p>Les modes en pile, comme un portefeuille. La carte du dessus est celle qui part en session. On touche une carte du fond pour la faire passer devant.</p>
+        <span class="try">Touche une carte du fond · puis le palet</span></figcaption>
+    </figure>
+
+    <!-- F -->
+    <figure>
+      <div class="phone"><div class="scr vf" data-state="free">
+        <div class="sb"><span>9:41</span><i><span></span><span></span></i></div><div class="isl"></div>
+        <div class="body">
+          <span class="lbl on-free">Aujourd'hui</span><span class="lbl on-lock">Session · <span data-name>Travail</span></span>
+          <div class="hero">
+            <div class="num on-free">2:14</div>
+            <div class="num on-lock" data-timer-short>0:00</div>
+            <div class="meta mute on-free"><span><b style="color:var(--s-fg)">6 jours</b> de série</span><span>3 sessions</span></div>
+            <div class="meta mute on-lock"><span>Objectif 1 h 30</span></div>
+          </div>
+          <button class="launch press" data-toggle>
+            <span class="puck" style="--p:52px"></span>
+            <span class="t" style="text-align:left"><span class="on-free"><b data-name>Travail</b><span class="mute" style="font-size:11.5px"><span data-count>10</span> apps · touche pour lancer</span></span><span class="on-lock"><b>Débloquer</b><span class="mute" style="font-size:11.5px">repose sur le Socle</span></span></span>
+          </button>
+          <div class="island on-free" aria-hidden="true"><span></span><span></span><span></span></div>
+        </div>
+        <div class="ecl"></div>
+      </div></div>
+      <figcaption><div class="h"><span class="tag">F</span><b>Chiffre</b></div>
+        <p>Un seul chiffre : ton temps de focus du jour, très grand. Il devient le chrono pendant la session. Le palet tient dans une petite barre en bas.</p>
+        <span class="try">Touche la barre du bas</span></figcaption>
+    </figure>
+
+  </main>
+
+  <footer><span>Chiffres d'exemple pour la maquette.</span><span>Socle · accueil v2 · 8 octobre 2026</span></footer>
+</div>
+
+<script>
+(() => {
+  const MODES = [
+    { name: 'Travail', apps: ['Ig','Tk','Yt','X','Rd','Sc','Nf','Tw','Dc','Fb'] },
+    { name: 'Lecture', apps: ['Ig','Tk','Yt','X','Rd','Sc','Nf','Tw','Dc','Fb','In','Pi','Gm','Sp'] },
+    { name: 'Soir', apps: ['Ig','Tk','X','Rd','Sc','Fb','Yt','Nf'] },
+  ];
+  const TONES = ['', 'g1', 'g2', 'g3'];
+  const appsHtml = (list, max = 6) => list.slice(0, max).map((m, i) => `<span class="app ${TONES[i % 4]}">${m}</span>`).join('') + (list.length > max ? `<span class="mono" style="margin-left:8px;font-size:11px;color:var(--s-mute)">+${list.length - max}</span>` : '');
+  const pad = n => String(Math.floor(n)).padStart(2, '0');
+  const C = 2 * Math.PI * 114;
+
+  const phones = [...document.querySelectorAll('.scr')].map(scr => ({ scr, mode: 0, start: 0 }));
+
+  function render(ph) {
+    const m = MODES[ph.mode];
+    ph.scr.querySelectorAll('[data-name]').forEach(e => e.textContent = m.name);
+    ph.scr.querySelectorAll('[data-count]').forEach(e => e.textContent = m.apps.length);
+    ph.scr.querySelectorAll('[data-apps]').forEach(e => e.innerHTML = appsHtml(m.apps));
+    arc(ph);
+  }
+  function arc(ph) {
+    const a = ph.scr.querySelector('[data-arc]'); if (!a) return;
+    a.style.strokeDasharray = C;
+    const locked = ph.scr.dataset.state === 'locked';
+    const frac = locked ? Math.min(1, (Date.now() - ph.start) / 1000 / 5400) : 134 / 180;
+    a.style.strokeDashoffset = C * (1 - Math.max(locked ? 0.004 : 0, frac));
+  }
+  function tick() {
+    for (const ph of phones) {
+      if (ph.scr.dataset.state !== 'locked') continue;
+      const s = Math.floor((Date.now() - ph.start) / 1000);
+      ph.scr.querySelectorAll('[data-timer]').forEach(e => e.textContent = `${pad(s / 3600)}:${pad((s % 3600) / 60)}:${pad(s % 60)}`);
+      ph.scr.querySelectorAll('[data-timer-short]').forEach(e => e.textContent = s >= 3600 ? `${Math.floor(s / 3600)}:${pad((s % 3600) / 60)}` : `${Math.floor(s / 60)}:${pad(s % 60)}`);
+      arc(ph);
+    }
+  }
+  setInterval(tick, 1000);
+
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  async function flip(ph, x, y, to) {
+    if (ph.busy) return;
+    const next = to ?? (ph.scr.dataset.state === 'free' ? 'locked' : 'free');
+    if (next === ph.scr.dataset.state) return;
+    ph.busy = true;
+    const e = ph.scr.querySelector('.ecl');
+    const r = ph.scr.getBoundingClientRect();
+    const cx = x == null ? r.width / 2 : x - r.left, cy = y == null ? r.height * .55 : y - r.top;
+    e.className = 'ecl'; e.style.opacity = 1; e.style.background = next === 'locked' ? '#050505' : '#fafaf9';
+    e.style.clipPath = `circle(0px at ${cx}px ${cy}px)`;
+    void e.offsetWidth;
+    e.classList.add('run'); e.style.clipPath = `circle(${Math.hypot(r.width, r.height)}px at ${cx}px ${cy}px)`;
+    await wait(920);
+    if (next === 'locked') ph.start = Date.now();
+    ph.scr.dataset.state = next; tick(); arc(ph);
+    e.classList.add('fade'); await wait(460);
+    e.className = 'ecl'; e.style.clipPath = ''; e.style.opacity = '';
+    resetSlider(ph);
+    ph.busy = false;
+    syncSwitch();
+  }
+
+  for (const ph of phones) {
+    render(ph);
+    ph.scr.querySelectorAll('[data-toggle]').forEach(b => b.addEventListener('click', ev => flip(ph, ev.clientX || null, ev.clientY || null)));
+    ph.scr.querySelectorAll('[data-cycle]').forEach(b => b.addEventListener('click', () => { ph.mode = (ph.mode + 1) % MODES.length; render(ph); }));
+    ph.scr.querySelectorAll('[data-cycle-prev]').forEach(b => b.addEventListener('click', () => { ph.mode = (ph.mode + MODES.length - 1) % MODES.length; render(ph); }));
+
+    // E · deck
+    const deck = ph.scr.querySelector('[data-deck]');
+    if (deck) {
+      deck.querySelectorAll('[data-apps-of]').forEach(e => e.innerHTML = appsHtml(MODES[+e.dataset.appsOf].apps, 5));
+      deck.querySelectorAll('.card').forEach(card => card.addEventListener('click', () => {
+        if (ph.scr.dataset.state === 'locked' || card.dataset.pos === '0') return;
+        const cards = [...deck.querySelectorAll('.card')];
+        const pos = +card.dataset.pos;
+        cards.forEach(c => { const p = +c.dataset.pos; c.dataset.pos = p === pos ? 0 : p < pos ? p + 1 : p; });
+        ph.mode = +card.dataset.mode;
+        deck.querySelectorAll('.card [data-timer]').forEach(t => t.remove());
+        card.querySelector('div').insertAdjacentHTML('beforeend', '<div class="timer on-lock" style="font-size:26px;margin-top:6px" data-timer>00:00:00</div>');
+        deck.querySelectorAll('.ct').forEach(c => c.classList.remove('on-free'));
+        card.querySelector('.ct').classList.add('on-free');
+      }));
+    }
+
+    // D · slider
+    const track = ph.scr.querySelector('[data-slider]');
+    if (track) {
+      const knob = track.querySelector('.knob');
+      let startX = 0, dx = 0, dragging = false;
+      const max = () => track.clientWidth - knob.offsetWidth - 12;
+      knob.addEventListener('pointerdown', ev => { if (ph.busy) return; dragging = true; startX = ev.clientX; knob.classList.remove('back'); knob.setPointerCapture(ev.pointerId); });
+      knob.addEventListener('pointermove', ev => { if (!dragging) return; dx = Math.max(0, Math.min(max(), ev.clientX - startX)); knob.style.translate = `${dx}px 0`; });
+      const end = ev => {
+        if (!dragging) return; dragging = false;
+        if (dx > max() * .82) { knob.style.translate = `${max()}px 0`; const r = knob.getBoundingClientRect(); flip(ph, r.left + r.width / 2, r.top + r.height / 2); }
+        else { knob.classList.add('back'); knob.style.translate = '0px 0'; }
+        dx = 0;
+      };
+      knob.addEventListener('pointerup', end); knob.addEventListener('pointercancel', end);
+      ph.resetSlider = () => { knob.classList.add('back'); knob.style.translate = '0px 0'; };
+    }
+  }
+  function resetSlider(ph) { ph.resetSlider && ph.resetSlider(); }
+
+  const allFree = document.getElementById('allFree'), allLocked = document.getElementById('allLocked');
+  function syncSwitch() {
+    const n = phones.filter(p => p.scr.dataset.state === 'locked').length;
+    allLocked.setAttribute('aria-pressed', n === phones.length); allFree.setAttribute('aria-pressed', n === 0);
+  }
+  allFree.addEventListener('click', () => phones.forEach((p, i) => setTimeout(() => flip(p, null, null, 'free'), i * 90)));
+  allLocked.addEventListener('click', () => phones.forEach((p, i) => setTimeout(() => flip(p, null, null, 'locked'), i * 90)));
+})();
+</script>

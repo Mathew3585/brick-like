@@ -13,6 +13,7 @@ import { loadAll, reconcile, settings } from '@/lib/data';
 import { useStore } from '@/lib/store';
 import { useTone } from '@/lib/tone';
 import { palette } from '@/theme';
+import { loadSounds } from '@/lib/sound';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -34,6 +35,7 @@ export default function RootLayout() {
   useEffect(() => {
     void loadAll().finally(() => setReady(true));
     void loadApps();
+    loadSounds();
     // The session may have changed natively while we were away (or the app list, after installs).
     const sub = AppState.addEventListener('change', (s) => {
       if (s !== 'active') return;

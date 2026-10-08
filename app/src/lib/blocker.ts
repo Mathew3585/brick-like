@@ -31,18 +31,21 @@ export const blocker = {
   isEnabled: () => Native?.isBlockerEnabled() ?? true,
   openSettings: () => Native?.openBlockerSettings(),
   openAppDetails: () => Native?.openAppDetails(),
+  ringerNormal: () => Native?.isRingerNormal() ?? true,
+  notifyEnabled: () => Native?.isNotifyEnabled() ?? true,
+  openNotifySettings: () => Native?.openNotifySettings(),
 
   installedApps: async (): Promise<InstalledApp[]> => (Native ? Native.getInstalledApps(96) : SAMPLE_APPS),
 
   start(mode: string, blocked: string[], startedAt: number) {
     if (Native) Native.startSession(mode, blocked, startedAt);
-    else simulated = { mode, blocked, startedAt, attempts: {} };
+    else simulated = { mode, blocked, startedAt, attempts: {}, muted: {} };
   },
-  stop(): Record<string, number> {
+  stop(): { attempts: Record<string, number>; muted: Record<string, number> } {
     if (Native) return Native.stopSession();
-    const attempts = simulated?.attempts ?? {};
+    const result = { attempts: simulated?.attempts ?? {}, muted: simulated?.muted ?? {} };
     simulated = null;
-    return attempts;
+    return result;
   },
   current: (): NativeSession | null => (Native ? Native.getSession() : simulated),
   /** Simulation only: what the accessibility service does when a blocked app is opened. */

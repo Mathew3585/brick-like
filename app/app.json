@@ -15,19 +15,34 @@
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "permissions": ["android.permission.NFC", "android.permission.VIBRATE"],
+      "permissions": [
+        "android.permission.NFC",
+        "android.permission.VIBRATE"
+      ],
       "predictiveBackGestureEnabled": false
     },
-    "web": { "favicon": "./assets/images/favicon.png" },
+    "web": {
+      "favicon": "./assets/images/favicon.png"
+    },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
-        { "backgroundColor": "#FAFAF9", "image": "./assets/images/splash-icon.png", "imageWidth": 88 }
+        {
+          "backgroundColor": "#FAFAF9",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 88
+        }
       ],
       [
         "expo-build-properties",
-        { "android": { "minSdkVersion": 26, "compileSdkVersion": 36, "targetSdkVersion": 36 } }
+        {
+          "android": {
+            "minSdkVersion": 26,
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 36
+          }
+        }
       ],
       [
         "expo-font",
@@ -42,8 +57,24 @@
             "./node_modules/@expo-google-fonts/geist-mono/500Medium/GeistMono_500Medium.ttf"
           ]
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/android-icon-monochrome.png",
+          "color": "#0A0A0A"
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "recordAudioAndroid": false,
+          "enableBackgroundPlayback": false
+        }
       ]
     ],
-    "experiments": { "reactCompiler": true }
+    "experiments": {
+      "reactCompiler": true
+    }
   }
 }

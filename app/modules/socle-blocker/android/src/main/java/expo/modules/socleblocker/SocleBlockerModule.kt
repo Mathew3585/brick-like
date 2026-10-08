@@ -34,12 +34,34 @@ class SocleBlockerModule : Module() {
       context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
+    Function("isNotifyEnabled") {
+      val expected = ComponentName(context, SocleNotificationListener::class.java)
+      val enabled = Settings.Secure.getString(context.contentResolver, "enabled_notification_listeners") ?: ""
+      enabled.split(':').any { ComponentName.unflattenFromString(it) == expected }
+    }
+
+    Function("openNotifySettings") {
+      val intent = if (android.os.Build.VERSION.SDK_INT >= 30) {
+        Intent(Settings.ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS)
+          .putExtra(Settings.EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME, ComponentName(context, SocleNotificationListener::class.java).flattenToString())
+      } else {
+        Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")
+      }
+      context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    }
+
     Function("openAppDetails") {
       context.startActivity(
         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
           .setData(android.net.Uri.parse("package:${context.packageName}"))
           .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
       )
+    }
+
+    /** False in silent or vibrate mode: the lock/unlock sounds stay quiet then. */
+    Function("isRingerNormal") {
+      val audio = context.getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
+      audio.ringerMode == android.media.AudioManager.RINGER_MODE_NORMAL
     }
 
     // --- Installed apps ---
@@ -69,6 +91,7 @@ class SocleBlockerModule : Module() {
 
     Function("startSession") { mode: String, blocked: List<String>, startedAt: Double ->
       SessionStore.start(context, mode, blocked, startedAt.toLong())
+      SocleNotificationListener.sweep()
     }
 
     Function("stopSession") {
@@ -85,6 +108,7 @@ class SocleBlockerModule : Module() {
           "startedAt" to s.startedAt.toDouble(),
           "blocked" to s.blocked.toList(),
           "attempts" to SessionStore.attempts(context),
+          "muted" to SessionStore.muted(context),
         )
       }
     }

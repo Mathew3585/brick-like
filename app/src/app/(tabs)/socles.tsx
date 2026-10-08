@@ -12,6 +12,7 @@ import { Cta, Label, Muted, Pill, Text, Title } from '@/components/ui';
 import { blocker, isSimulated } from '@/lib/blocker';
 import { removeSocle, settings, socles, sosLeft, SOS_PER_MONTH, type Socle } from '@/lib/data';
 import { ago, plural } from '@/lib/format';
+import { usePermissions } from '@/lib/permissions';
 import { useStore } from '@/lib/store';
 import { usePalette } from '@/lib/tone';
 
@@ -21,7 +22,7 @@ export default function Socles() {
   const s = useStore(settings);
   const [pairing, setPairing] = useState(false);
   const [removing, setRemoving] = useState<Socle | null>(null);
-  const blockerOn = blocker.isEnabled();
+  const { blocker: blockerOn, notify: notifyOn } = usePermissions();
   const nfc = blocker.nfcStatus();
 
   return (
@@ -97,6 +98,26 @@ export default function Socles() {
           }
         />
         <SettingRow
+          title="Notifications"
+          detail={isSimulated ? 'Simulation (Expo Go).' : notifyOn ? 'Coupées pour les apps en pause pendant une session.' : 'Les apps en pause peuvent encore te notifier. Donne l’accès aux notifications.'}
+          right={
+            isSimulated ? null : notifyOn ? (
+              <Pill solid>Actif</Pill>
+            ) : (
+              <PressableScale onPress={() => blocker.openNotifySettings()} hapticOnPress="tap" style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99, backgroundColor: p.fg }}>
+                <Text f="medium" size={13} color={p.bg}>
+                  Activer
+                </Text>
+              </PressableScale>
+            )
+          }
+        />
+        <SettingRow
+          title="Sons"
+          detail="Au verrouillage et au déblocage. Jamais en mode silencieux."
+          right={<Toggle label="Sons" value={s.sounds !== false} onChange={(sounds) => settings.set((v) => ({ ...v, sounds }))} />}
+        />
+        <SettingRow
           title="Déblocages d'urgence"
           detail="Remis à zéro chaque mois."
           right={
@@ -117,25 +138,6 @@ export default function Socles() {
                 Revoir
               </Text>
             </PressableScale>
-          }
-        />
-        <SettingRow
-          title="Objectif de session"
-          detail="La barre de progression pendant le verrouillage."
-          right={
-            <View style={{ flexDirection: 'row', gap: 6 }}>
-              {[45, 90, 120].map((m) => (
-                <PressableScale
-                  key={m}
-                  hapticOnPress="tap"
-                  onPress={() => settings.set((v) => ({ ...v, goalMin: m }))}
-                  style={{ paddingHorizontal: 10, paddingVertical: 7, borderRadius: 99, backgroundColor: s.goalMin === m ? p.fg : p.card }}>
-                  <Text f="mono" size={11.5} color={s.goalMin === m ? p.bg : p.fg}>
-                    {m < 60 ? `${m}m` : `${m / 60}h${m % 60 ? m % 60 : ''}`}
-                  </Text>
-                </PressableScale>
-              ))}
-            </View>
           }
         />
       </Animated.View>
