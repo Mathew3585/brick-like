@@ -3,28 +3,38 @@ import Phone from './Phone.astro';
 import Puck3D from './Puck3D.astro';
 import HomeScreen from './screens/HomeScreen.astro';
 import WaitlistForm from './WaitlistForm.astro';
+import { Icon } from 'astro-icon/components';
+
+const keyFacts = [
+  { icon: 'ph:lightning-slash', label: 'Sans pile' },
+  { icon: 'ph:user-circle-dashed', label: 'Sans compte' },
+  { icon: 'ph:lifebuoy', label: "3 déblocages d'urgence par mois" },
+];
 ---
 
 <section id="top" class="relative mx-auto grid min-h-[100dvh] max-w-[1240px] grid-cols-[minmax(0,1fr)] items-center gap-12 px-4 pt-28 pb-16 md:px-8 lg:grid-cols-[1.25fr_1fr] lg:gap-8 lg:pt-24">
   <div class="max-w-[640px]">
-    <p data-hero-in class="font-mono text-xs tracking-[0.14em] text-muted uppercase">Une app Android et un objet</p>
+    <p data-hero-in class="font-mono text-xs tracking-[0.14em] text-muted uppercase">Un objet + une application Android</p>
     <h1 class="mt-5 text-[clamp(2.5rem,4.6vw,4.25rem)] leading-[0.98] font-medium tracking-[-0.045em]">
-      <span class="block overflow-hidden pb-[0.06em]"><span data-hero-line class="block">Pose ton téléphone.</span></span>
-      <span class="block overflow-hidden pb-[0.06em]"><span data-hero-line class="block text-muted">Reprends ton temps.</span></span>
+      <span class="block overflow-hidden pb-[0.06em]"><span data-hero-line class="block">Ton téléphone te vole des heures.</span></span>
+      <span class="block overflow-hidden pb-[0.06em]"><span data-hero-line class="block text-muted">Pose-le sur le Socle.</span></span>
     </h1>
     <p data-hero-in class="mt-6 max-w-[42ch] text-lg leading-relaxed text-muted">
-      Sur le Socle, les apps qui te distraient se mettent en pause. Pour les retrouver, il faut revenir à lui.
+      Instagram, TikTok, YouTube : choisis ce qui te distrait. Dès que ton téléphone touche le Socle, tout ça se bloque. Pour le débloquer, il faut te lever et revenir le toucher.
     </p>
     <div data-hero-in class="mt-9">
       <WaitlistForm id="email-hero" />
     </div>
+    <ul data-hero-in class="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted">
+      {keyFacts.map((f) => <li class="flex items-center gap-1.5"><Icon name={f.icon} class="size-4" />{f.label}</li>)}
+    </ul>
   </div>
 
   <div class="relative flex justify-center lg:justify-end" data-hero-stage>
     <div class="hero-halo" aria-hidden="true"></div>
     <div class="relative flex flex-col items-center" data-hero-object>
       <div data-hero-phone class="relative z-10 [transform-style:preserve-3d] [transform:perspective(1400px)_rotateY(-20deg)_rotateX(3deg)]">
-        <Phone label="L'accueil de l'app Socle : choix du mode Travail et bouton Verrouiller sur le Socle" class="[--w:min(250px,58vw,30dvh)] lg:[--w:min(260px,29dvh)]">
+        <Phone label="L'accueil de l'application Socle : choix du mode Travail et bouton Verrouiller sur le Socle" class="[--w:min(250px,58vw,30dvh)] lg:[--w:min(260px,29dvh)]">
           <HomeScreen id="hero" />
         </Phone>
       </div>

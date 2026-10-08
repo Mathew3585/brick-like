@@ -26,8 +26,8 @@ const progress = Math.min(1, start / (goal * 60));
 <div class:list={['screen flex flex-col items-center bg-[#050505] text-[#F4F4F2]', cls]} data-screen="locked" style={`padding:${pt(65)} ${pt(22)} ${pt(54)}`}>
   <StatusBar />
   <div class="flex justify-between self-stretch font-mono text-[#77777C] uppercase" style={`font-size:${pt(10.5)};letter-spacing:${pt(1.6)}`}>
-    <span>Session · Travail</span>
-    <span>10 apps en pause</span>
+    <span>Travail</span>
+    <span>10 applications en pause</span>
   </div>
 
   <div class="flex flex-1 flex-col items-center justify-center">
@@ -50,7 +50,7 @@ const progress = Math.min(1, start / (goal * 60));
       <Puck id={`${id}-puck`} class="relative" style={`width:${pt(158)};margin-top:${pt(19)}`} led="on" />
     </div>
     <p class="font-mono font-light tabular-nums" style={`font-size:${pt(48)};letter-spacing:${pt(-2.8)};margin-top:${pt(26)}`} data-clock={start}>{fmt(start)}</p>
-    <p class="text-[#77777C]" style={`font-size:${pt(14)};margin-top:${pt(6)}`}>sur {goal} min</p>
+    <p class="text-[#77777C]" style={`font-size:${pt(14)};margin-top:${pt(6)}`}>sur {goal} minutes</p>
   </div>
 
   <div class="self-stretch">

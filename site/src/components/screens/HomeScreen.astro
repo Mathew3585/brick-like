@@ -5,14 +5,16 @@ import Puck from '../Puck.astro';
 import { pt } from './pt';
 
 /**
- * L'accueil de l'app (components/home/HomeView.tsx), en papier : la date, le Socle dans ses deux
+ * L'accueil de l'application (components/home/HomeView.tsx), en papier : la date, le Socle dans ses deux
  * anneaux, le mode, la durée. La barre d'onglets est l'îlot d'encre flottant.
  */
 interface Props {
   id: string;
   class?: string;
+  /** Ajoute le projecteur qui met une zone de l'écran en avant (séquence « Comment ça marche »). */
+  focus?: boolean;
 }
-const { id, class: cls = '' } = Astro.props;
+const { id, class: cls = '', focus = false } = Astro.props;
 const modes = ['Travail', 'Lecture', 'Soir'];
 const tabs = [
   { icon: 'ph:house', on: true },
@@ -35,7 +37,7 @@ const tabs = [
   </div>
 
   <div class="flex flex-col items-center" style={`gap:${pt(10)};padding-bottom:${pt(18)}`}>
-    <span class="flex items-center" style={`gap:${pt(8)};padding:${pt(6)} ${pt(14)}`}>
+    <span class="flex items-center" data-zone="mode" style={`gap:${pt(8)};padding:${pt(6)} ${pt(14)}`}>
       <span class="relative grid font-semibold tracking-[-0.03em]" style={`font-size:${pt(28)}`} data-mode-name>
         {
           modes.map((m, i) => (
@@ -47,12 +49,14 @@ const tabs = [
       </span>
       <Icon name="ph:caret-down" class="text-[#86868B]" style={`font-size:${pt(16)}`} />
     </span>
-    <span class="flex items-center rounded-full border border-black/[0.08]" style={`gap:${pt(6)};padding:${pt(7)} ${pt(14)};margin-top:${pt(-4)}`}>
-      <span class="font-mono" style={`font-size:${pt(13)}`}>50 min</span>
+    <span class="flex items-center rounded-full border border-black/[0.08]" data-zone="duration" style={`gap:${pt(6)};padding:${pt(7)} ${pt(14)};margin-top:${pt(-4)}`}>
+      <span class="font-mono" style={`font-size:${pt(13)}`}>50 minutes</span>
       <Icon name="ph:caret-down" class="text-[#86868B]" style={`font-size:${pt(12)}`} />
     </span>
     <span class="text-[#86868B]" style={`font-size:${pt(14)}`}>Touche le Socle</span>
   </div>
+
+  {focus && <span class="focus" data-focus aria-hidden="true"></span>}
 
   <div class="absolute inset-x-0 flex justify-center" style={`bottom:${pt(48)}`}>
     <div class="relative flex rounded-full bg-[#0A0A0A]" style={`width:${pt(268)};padding:${pt(6)}`}>
@@ -69,6 +73,22 @@ const tabs = [
 </div>
 
 <style>
+  /*
+    Le projecteur : un cadre transparent dont l'ombre géante assombrit tout le reste de l'écran.
+    Placé et affiché par scripts/motion.ts ; invisible sans animation.
+  */
+  .focus {
+    position: absolute;
+    z-index: 4;
+    left: 0;
+    top: 0;
+    border-radius: 999px;
+    box-shadow:
+      0 0 0 1.5px rgba(10, 10, 10, 0.9),
+      0 0 0 200vmax rgba(10, 10, 10, 0.55);
+    opacity: 0;
+    pointer-events: none;
+  }
   @media (prefers-reduced-motion: no-preference) {
     .orb-breath {
       animation: breath 4.8s var(--spring) infinite;

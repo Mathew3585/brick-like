@@ -3,8 +3,8 @@ import { Icon } from 'astro-icon/components';
 import Roll from './Roll.astro';
 
 const links = [
-  { href: '#fonctionnement', label: 'Comment ça marche' },
   { href: '#modes', label: 'Pourquoi' },
+  { href: '#fonctionnement', label: 'Comment ça marche' },
   { href: '#objet', label: 'Le Socle' },
   { href: '#faq', label: 'Questions' },
 ];
@@ -12,10 +12,10 @@ const links = [
 
 <header data-nav class="pointer-events-none fixed inset-x-0 top-0 z-40 flex justify-center px-4 pt-4">
   <nav
-    class="tone nav-glass pointer-events-auto grid h-14 w-full max-w-[760px] grid-cols-[1fr_auto] items-center gap-4 rounded-full pr-2 pl-4 text-sm md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
+    class="tone nav-glass pointer-events-auto grid h-14 w-full max-w-[800px] grid-cols-[1fr_auto] items-center gap-4 rounded-full pr-2 pl-4 text-sm lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
     aria-label="Navigation principale">
     <a href="#top" class="justify-self-start text-base font-semibold tracking-[-0.03em]">Socle</a>
-    <ul data-nav-links class="relative hidden items-center text-muted md:flex">
+    <ul data-nav-links class="relative hidden items-center whitespace-nowrap text-muted lg:flex">
       <span data-nav-pill class="nav-pill" aria-hidden="true"></span>
       {
         links.map((l) => (

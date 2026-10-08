@@ -171,6 +171,11 @@ body,
   transform: none;
 }
 
+/* « Sois parmi les premiers. » : caché sous sa ligne jusqu'à ce que scripts/motion.ts le fasse monter. */
+html:not(.no-js):not(.reduced) [data-final-word] {
+  transform: translateY(105%);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html,
   body,

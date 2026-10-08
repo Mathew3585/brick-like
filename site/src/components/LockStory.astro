@@ -6,33 +6,63 @@ import LockedScreen from './screens/LockedScreen.astro';
 
 /**
  * La séquence centrale, épinglée : choisir un mode, poser le téléphone sur le Socle, tout se tait.
- * Au contact, la page entière passe du papier à l'encre, comme l'app. Animée dans scripts/motion.ts.
+ * Au contact, la page entière passe du papier à l'encre, comme l'application. Animée dans scripts/motion.ts.
  */
 const steps = [
-  { title: 'Choisis un mode.', body: "Travail, Lecture, Soir : chaque mode a sa liste d'apps. Puis la durée, de 25 minutes à 2 heures, ou libre." },
-  { title: 'Pose-le sur le Socle.', body: 'Le haut du téléphone contre le Socle. Une vibration, un son, et la session commence.' },
-  { title: 'Tout se tait.', body: "Les apps du mode passent en pause, leurs notifications disparaissent. L'anneau se remplit jusqu'à ton objectif." },
+  { side: 'left', title: 'Choisis un mode.', body: "Travail, Lecture, Soir : chaque mode a sa liste d'applications. Puis la durée, de 25 minutes à 2 heures, ou libre." },
+  { side: 'right', title: 'Pose-le sur le Socle.', body: 'Le haut du téléphone contre le Socle. Une vibration, un son, et la session commence.' },
+  { side: 'left', title: 'Tout se tait.', body: "Les applications du mode passent en pause, leurs notifications disparaissent. L'anneau se remplit jusqu'à ton objectif." },
+];
+// Le focus sur l'écran, sur grand écran : le mode à gauche du téléphone, la durée à droite.
+const notes = [
+  { label: 'Le mode', title: 'Travail, Lecture, Soir.', body: "Chaque mode a sa liste d'applications à mettre en pause. Tu peux créer les tiens." },
+  { label: 'La durée', title: 'De 25 minutes à 2 heures.', body: "Ou sans limite : la session dure jusqu'à ce que tu reviennes au Socle." },
 ];
 ---
 
 <section id="fonctionnement" data-lock class="relative">
-  <div class="mx-auto grid min-h-[100dvh] max-w-[1240px] grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr] items-center gap-6 px-4 pt-24 pb-8 md:px-8 lg:grid-cols-2 lg:grid-rows-1 lg:pt-0 lg:pb-0">
-    <div data-lock-steps class="grid">
+  <!--
+    Sur grand écran, le téléphone et le Socle sont au centre ; chaque étape s'affiche d'un côté,
+    à gauche puis à droite. Sur mobile, le texte reste au-dessus du téléphone.
+  -->
+  <div class="mx-auto grid min-h-[100dvh] max-w-[1240px] grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr] items-center gap-6 px-4 pt-24 pb-8 md:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)_minmax(0,1fr)] lg:grid-rows-1 lg:gap-0 lg:pt-0 lg:pb-0">
+    <div data-lock-steps class="grid lg:contents">
       {
         steps.map((s, i) => (
-          <div data-step={i} class="col-start-1 row-start-1 max-w-[440px]">
-            <h2 class="text-[clamp(2.2rem,5vw,4rem)] leading-[1.02] font-medium tracking-[-0.04em]">{s.title}</h2>
+          <div
+            data-step={i}
+            class:list={[
+              'col-start-1 row-start-1 max-w-[440px] lg:row-start-1',
+              s.side === 'left' ? 'lg:col-start-1 lg:pr-4' : 'lg:col-start-3 lg:justify-self-end lg:pl-4',
+            ]}>
+            <h2 class="text-[clamp(2.2rem,5vw,4rem)] leading-[1.02] font-medium tracking-[-0.04em] lg:text-[clamp(2.2rem,3.4vw,3.25rem)]">{s.title}</h2>
             <p class="mt-4 max-w-[38ch] text-base leading-relaxed text-muted md:mt-5 md:text-lg">{s.body}</p>
           </div>
         ))
       }
     </div>
 
-    <div data-lock-scene class="relative flex h-full flex-col items-center justify-center [perspective:1400px]">
+    {
+      notes.map((n, i) => (
+        <div
+          data-note={i}
+          aria-hidden="true"
+          class:list={[
+            'hidden max-w-[280px] opacity-0 lg:row-start-1 lg:block',
+            i === 0 ? 'lg:col-start-1 lg:justify-self-end lg:pr-6 lg:text-right' : 'lg:col-start-3 lg:justify-self-start lg:pl-6',
+          ]}>
+          <p class="font-mono text-xs tracking-[0.14em] text-muted uppercase">{n.label}</p>
+          <p class="mt-3 text-2xl leading-tight font-medium tracking-[-0.03em]">{n.title}</p>
+          <p class="mt-3 leading-relaxed text-muted">{n.body}</p>
+        </div>
+      ))
+    }
+
+    <div data-lock-scene class="relative flex h-full flex-col items-center justify-center [perspective:1400px] lg:col-start-2 lg:row-start-1">
       <div class="scene-spot" aria-hidden="true"></div>
       <div data-lock-phone class="relative z-10 [transform-style:preserve-3d] will-change-transform">
-        <Phone label="L'app Socle passe de l'accueil à une session verrouillée" class="[--w:min(210px,22dvh,48vw)] lg:[--w:min(240px,27dvh)]">
-          <HomeScreen id="lock" />
+        <Phone label="L'application Socle passe de l'accueil à une session verrouillée" class="[--w:min(210px,22dvh,48vw)] lg:[--w:min(240px,27dvh)]">
+          <HomeScreen id="lock" focus />
           <LockedScreen id="lock" class="opacity-0" start={0} />
         </Phone>
       </div>
@@ -63,8 +93,20 @@ const steps = [
   :global(.no-js) [data-lock-steps] {
     gap: 2.5rem;
   }
+  :global(.reduced) [data-lock-steps],
+  :global(.no-js) [data-lock-steps] {
+    display: grid;
+    align-self: center;
+  }
+  :global(.reduced) [data-note],
+  :global(.no-js) [data-note] {
+    display: none !important;
+  }
   :global(.reduced) [data-step],
   :global(.no-js) [data-step] {
+    grid-column: auto;
+    justify-self: start;
+    padding: 0;
     grid-row: auto;
     opacity: 1 !important;
   }

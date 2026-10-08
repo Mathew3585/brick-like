@@ -116,30 +116,68 @@ if (reduced) {
   // chargement serait fausse si la page s'ouvre au milieu de la séquence.
   const land = () => gsap.set(phone, { y: drop() * fx.land, rotateX: lay * fx.land, scale: 1 - 0.1 * fx.land });
 
+  // Le focus, sur grand écran : le téléphone grossit au centre, le texte de l'étape s'efface, et
+  // les deux notes s'affichent de chaque côté. Le projecteur passe du mode (zone 0) à la durée (zone 1).
+  // Sur mobile, pas la place : le texte reste au-dessus du téléphone, seul le projecteur bouge.
+  const wide = () => matchMedia('(min-width: 1024px)').matches;
+  const device = $('.phone', phone)!;
+  const [note0, note1] = $$('[data-note]', lock);
+  const focus = $('[data-focus]', home)!;
+  const zones = [$('[data-zone="mode"]', home)!, $('[data-zone="duration"]', home)!];
+  const spot = { on: 0, zone: 0 };
+  const lerp = (a: number, b: number) => a + (b - a) * spot.zone;
+  // Le haut du téléphone reste en place : il grossit vers le bas, par-dessus le Socle qui s'efface.
+  gsap.set(device, { transformOrigin: '50% 15%' });
+  const drawFocus = () => {
+    const [a, b] = zones;
+    const pad = home.offsetWidth * 0.025;
+    gsap.set(focus, {
+      opacity: spot.on,
+      x: lerp(a.offsetLeft, b.offsetLeft) - pad,
+      y: lerp(a.offsetTop, b.offsetTop) - pad,
+      width: lerp(a.offsetWidth, b.offsetWidth) + pad * 2,
+      height: lerp(a.offsetHeight, b.offsetHeight) + pad * 2,
+    });
+  };
   // Moment où le téléphone touche le Socle, en temps de timeline puis en progression.
-  const CONTACT = 4.5;
+  const CONTACT = 6.1;
   let contactAt = 0.5;
   const tl = gsap.timeline({
     defaults: { ease: 'power2.inOut' },
     scrollTrigger: {
       trigger: lock,
       start: 'top top',
-      end: '+=320%',
+      end: '+=420%',
       pin: true,
       scrub: 0.8,
       invalidateOnRefresh: true,
+      onRefresh: drawFocus,
     },
   });
 
-  // 1. Choisir un mode : le nom passe sur Lecture, puis revient sur Travail.
-  tl.to(names[0], { opacity: 0, y: -8, duration: 0.3 }, 0.5)
-    .fromTo(names[1], { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3 }, 0.55)
-    .to(names[1], { opacity: 0, y: -8, duration: 0.3 }, 1.2)
-    .fromTo(names[0], { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3, immediateRender: false }, 1.25)
+  // 1. Choisir un mode : focus sur l'écran. Le mode passe sur Lecture puis revient sur Travail,
+  // puis le projecteur descend sur la durée : celle du mode disparaît, celle de la durée apparaît.
+  tl.to(s0, { opacity: () => (wide() ? 0 : 1), x: () => (wide() ? -24 : 0), duration: 0.4 }, 0.2)
+    .to(device, { scale: () => (wide() ? 1.4 : 1), duration: 0.9 }, 0.2)
+    .to(puck, { opacity: () => (wide() ? 0.15 : 1), duration: 0.9 }, 0.2)
+    .to(spot, { on: 1, duration: 0.4, onUpdate: drawFocus }, 0.6)
+    .fromTo(note0, { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.4 }, 0.6)
+    .to(names[0], { opacity: 0, y: -8, duration: 0.3 }, 1.1)
+    .fromTo(names[1], { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3 }, 1.15)
+    .to(names[1], { opacity: 0, y: -8, duration: 0.3 }, 1.7)
+    .fromTo(names[0], { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3, immediateRender: false }, 1.75)
+    .to(spot, { zone: 1, duration: 0.5, onUpdate: drawFocus }, 2.3)
+    .to(note0, { opacity: 0, x: -24, duration: 0.35 }, 2.3)
+    .fromTo(note1, { opacity: 0, x: 24 }, { opacity: 1, x: 0, duration: 0.4 }, 2.4)
+    // Fin du focus : tout revient en place avant que le téléphone se pose.
+    .to(spot, { on: 0, duration: 0.4, onUpdate: drawFocus }, 3.1)
+    .to(note1, { opacity: 0, x: 24, duration: 0.35 }, 3.1)
+    .to(device, { scale: 1, duration: 0.7 }, 3.1)
+    .to(puck, { opacity: 1, duration: 0.7 }, 3.1)
     // 2. Poser sur le Socle.
-    .to(s0, { opacity: 0, y: -24, duration: 0.4 }, 2)
-    .fromTo(s1, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.4 }, 2.3)
-    .to(fx, { land: 1, duration: 2, ease: 'power3.inOut', onUpdate: land }, 2.4)
+    .to(s0, { opacity: 0, y: -24, duration: 0.4 }, 3.6)
+    .fromTo(s1, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.4 }, 3.9)
+    .to(fx, { land: 1, duration: 2, ease: 'power3.inOut', onUpdate: land }, 4.0)
     // Contact : ondes NFC, l'écran passe au noir.
     .fromTo(
       fx,
@@ -158,10 +196,10 @@ if (reduced) {
     .to(home, { opacity: 0, duration: 0.35 }, CONTACT)
     .to(locked, { opacity: 1, duration: 0.35 }, CONTACT)
     // 3. Tout se tait : le téléphone se relève, le temps passe, l'anneau se remplit.
-    .to(s1, { opacity: 0, y: -24, duration: 0.4 }, 5.1)
-    .fromTo(s2, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.4 }, 5.4)
-    .to(fx, { land: 0, duration: 1.6, ease: 'power3.inOut', onUpdate: land }, 5.2)
-    .to(fx, { t: LAPSE, duration: 2.2, ease: 'power1.in', onUpdate: () => showTime(lockClock, Math.round(fx.t)) }, 5.4)
+    .to(s1, { opacity: 0, y: -24, duration: 0.4 }, 6.7)
+    .fromTo(s2, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.4 }, 7.0)
+    .to(fx, { land: 0, duration: 1.6, ease: 'power3.inOut', onUpdate: land }, 6.8)
+    .to(fx, { t: LAPSE, duration: 2.2, ease: 'power1.in', onUpdate: () => showTime(lockClock, Math.round(fx.t)) }, 7.0)
     .to({}, { duration: 0.8 });
 
   contactAt = CONTACT / tl.duration();
@@ -288,7 +326,12 @@ if (!reduced) {
   puck3d.then((m) => m.whenPuck('object')).then((api) => api.setView(view.elev, view.spin));
 
   // « Reprends. » monte quand la page repasse au papier.
-  gsap.from('[data-final-word]', { yPercent: 105, duration: 1.4, stagger: 0.1, ease: SPRING, scrollTrigger: { trigger: final, start: 'top 60%' } });
+  // Départ posé explicitement (et déjà caché en CSS) : sinon le titre s'affiche un instant avant de monter.
+  gsap.fromTo(
+    '[data-final-word]',
+    { y: 0, yPercent: 105 },
+    { yPercent: 0, duration: 1.4, stagger: 0.1, ease: SPRING, immediateRender: true, scrollTrigger: { trigger: final, start: 'top 60%' } },
+  );
 }
 
 // Les polices changent les hauteurs : on recalcule une fois qu'elles sont prêtes.
