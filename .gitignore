@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+
+# Secrets / env (keep the examples)
+.env
+.env.*
+!.env.example
+
+# Local data & databases
+data-local/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+coverage/
+
+# Android / Expo artifacts
+*.apk
+*.aab
+*.jks
+*.keystore
+!debug.keystore
+
+# Bench photos
+server/bench/*.jpg
+server/bench/*.jpeg
+server/bench/*.png
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Claude Code (local-only settings)
+.claude/settings.local.json
+
+# OS / editors
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json

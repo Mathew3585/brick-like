@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="socle_accessibility_label">Socle</string>
+  <string name="socle_accessibility_description">Socle détecte l\'app ouverte au premier plan pour mettre en pause celles de ton mode pendant une session. Rien n\'est lu ni envoyé.</string>
+</resources>

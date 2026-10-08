@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "Socle",
+    "slug": "socle",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "socle",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#FAFAF9",
+    "android": {
+      "package": "com.mathewsimon.socle",
+      "adaptiveIcon": {
+        "backgroundColor": "#0A0A0A",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "permissions": ["android.permission.NFC", "android.permission.VIBRATE"],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": { "favicon": "./assets/images/favicon.png" },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        { "backgroundColor": "#FAFAF9", "image": "./assets/images/splash-icon.png", "imageWidth": 88 }
+      ],
+      [
+        "expo-build-properties",
+        { "android": { "minSdkVersion": 26, "compileSdkVersion": 36, "targetSdkVersion": 36 } }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./node_modules/@expo-google-fonts/geist/300Light/Geist_300Light.ttf",
+            "./node_modules/@expo-google-fonts/geist/400Regular/Geist_400Regular.ttf",
+            "./node_modules/@expo-google-fonts/geist/500Medium/Geist_500Medium.ttf",
+            "./node_modules/@expo-google-fonts/geist/600SemiBold/Geist_600SemiBold.ttf",
+            "./node_modules/@expo-google-fonts/geist-mono/300Light/GeistMono_300Light.ttf",
+            "./node_modules/@expo-google-fonts/geist-mono/400Regular/GeistMono_400Regular.ttf",
+            "./node_modules/@expo-google-fonts/geist-mono/500Medium/GeistMono_500Medium.ttf"
+          ]
+        }
+      ]
+    ],
+    "experiments": { "reactCompiler": true }
+  }
+}
