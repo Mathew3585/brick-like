@@ -1,0 +1,29 @@
+---
+/** Pourquoi un objet : la ligne de la limite d'écran se fait barrer au défilement, celle du Socle reste. */
+---
+
+<section class="mx-auto max-w-[1240px] px-4 py-28 md:px-8 md:py-44" data-why>
+  <p class="text-[clamp(1.6rem,4.2vw,3.5rem)] leading-[1.1] font-medium tracking-[-0.04em] text-muted">
+    <span data-strike class="strike">Une limite d'écran se désactive en deux taps.</span>
+  </p>
+  <p class="reveal mt-5 text-[clamp(1.6rem,4.2vw,3.5rem)] leading-[1.1] font-medium tracking-[-0.04em]">
+    Le Socle te demande de te lever.
+  </p>
+  <p class="reveal mt-10 max-w-[52ch] text-lg leading-relaxed text-muted">
+    Le Socle reste sur ton bureau, loin de ta main. Pour récupérer tes apps, il faut traverser la pièce. Ces quelques secondes suffisent pour te demander si tu en as vraiment besoin.
+  </p>
+</section>
+
+<style>
+  /* Un trait par ligne (box-decoration-break), dont la longueur suit --s. */
+  .strike {
+    --s: 0%;
+    background: linear-gradient(currentColor, currentColor) 0 58% / var(--s) 0.07em no-repeat;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  :global(.reduced) .strike,
+  :global(.no-js) .strike {
+    --s: 100%;
+  }
+</style>

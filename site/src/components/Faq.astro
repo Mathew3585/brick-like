@@ -1,0 +1,99 @@
+---
+import { Icon } from 'astro-icon/components';
+
+const faq = [
+  {
+    q: "J'ai oublié d'arrêter ma session en partant de chez moi.",
+    a: "Tes apps restent en pause, c'est le principe. Si tu en as vraiment besoin, tu as trois déblocages d'urgence par mois. Et si ça t'arrive souvent, associe un deuxième Socle, au bureau par exemple : n'importe lequel de tes Socles termine la session.",
+  },
+  {
+    q: 'Je peux toujours recevoir des appels et des messages ?',
+    a: "Oui. Seules les apps du mode sont en pause : tes appels, tes SMS et tout le reste marchent normalement. C'est toi qui choisis ce qui se tait.",
+  },
+  {
+    q: 'Que se passe-t-il quand le temps choisi est écoulé ?',
+    a: "Une notification te dit que c'est bon. Tes apps restent en pause jusqu'à ce que tu reposes ton téléphone sur le Socle : c'est toi qui décides quand tu reprends, pas un minuteur.",
+  },
+  {
+    q: 'Et si je perds mon Socle ?',
+    a: "Utilise un déblocage d'urgence pour récupérer tes apps, puis associe ton nouveau Socle dans l'app. L'ancien ne débloque plus rien une fois retiré.",
+  },
+  {
+    q: 'Je peux choisir les apps qui se mettent en pause ?',
+    a: 'Oui. Chaque mode a sa propre liste : les réseaux sociaux et les vidéos pendant le travail, tout sauf ta liseuse pour lire. Tu peux aussi créer tes propres modes.',
+  },
+  {
+    q: 'Ça marche sur iPhone ?',
+    a: "Pas encore. Socle sort d'abord sur Android.",
+  },
+  {
+    q: 'Vous voyez ce que je bloque ?',
+    a: 'Non. Pas de compte, pas de serveur : tes modes, tes sessions et tes stats restent sur ton téléphone.',
+  },
+];
+---
+
+<section id="faq" class="mx-auto grid max-w-[1240px] gap-10 px-4 pb-32 md:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+  <h2 class="reveal text-[clamp(2rem,3.6vw,3rem)] leading-[1.05] font-medium tracking-[-0.04em]">Questions</h2>
+  <div class="divide-y divide-line border-y border-line">
+    {
+      faq.map((f) => (
+        <details data-faq class="group reveal">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-6 py-6 text-lg font-medium [&::-webkit-details-marker]:hidden">
+            {f.q}
+            <Icon name="ph:plus" class="faq-plus shrink-0 text-xl" />
+          </summary>
+          <div data-faq-body class="overflow-hidden">
+            <p class="max-w-[58ch] pb-6 leading-relaxed text-muted">{f.a}</p>
+          </div>
+        </details>
+      ))
+    }
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+
+  // La réponse se déplie et se replie en douceur ; sans animation, le <details> natif suffit.
+  if (!document.documentElement.classList.contains('reduced')) {
+    for (const details of document.querySelectorAll<HTMLDetailsElement>('[data-faq]')) {
+      const summary = details.querySelector('summary')!;
+      const body = details.querySelector<HTMLElement>('[data-faq-body]')!;
+      summary.addEventListener('click', (e) => {
+        e.preventDefault();
+        gsap.killTweensOf(body);
+        if (!details.open || details.dataset.closing) {
+          // Repart de la hauteur actuelle si on rouvre pendant la fermeture.
+          const from = details.open ? body.offsetHeight : 0;
+          delete details.dataset.closing;
+          details.open = true;
+          gsap.fromTo(body, { height: from, opacity: from ? 1 : 0 }, { height: 'auto', opacity: 1, duration: 0.6, ease: 'power3.out' });
+        } else {
+          details.dataset.closing = 'true';
+          gsap.to(body, {
+            height: 0,
+            opacity: 0,
+            duration: 0.45,
+            ease: 'power3.inOut',
+            onComplete: () => {
+              details.open = false;
+              delete details.dataset.closing;
+              gsap.set(body, { clearProps: 'height,opacity' });
+            },
+          });
+        }
+      });
+    }
+  }
+</script>
+
+<style>
+  /* Le « + » devient « × » ; il repart dès le début de la fermeture. */
+  .faq-plus {
+    transition: rotate 0.5s var(--spring);
+  }
+  [data-faq][open]:not([data-closing]) .faq-plus {
+    rotate: 45deg;
+  }
+</style>

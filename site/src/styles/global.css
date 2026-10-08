@@ -1,0 +1,184 @@
+@import "tailwindcss";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+
+/*
+  Direction "Éclipse", reprise de l'app : papier quand tu es libre, encre quand tu bosses.
+  Pas d'autre couleur. La page change de ton deux fois, au verrouillage puis au déverrouillage.
+  Rayons : pilule pour tout ce qui se touche, 28px (le bezel de l'app) pour les surfaces.
+*/
+:root {
+  --bg: #fafaf9;
+  --fg: #0a0a0a;
+  --muted: #6b6b70;
+  --line: rgba(0, 0, 0, 0.08);
+  --card: #f0f0ee;
+  --raised: #ffffff;
+  --spring: cubic-bezier(0.32, 0.72, 0, 1);
+  color-scheme: light;
+}
+:root[data-tone="dark"] {
+  --bg: #050505;
+  --fg: #f4f4f2;
+  --muted: #8e8e93;
+  --line: rgba(255, 255, 255, 0.09);
+  --card: #121214;
+  --raised: #0c0c0d;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-card: var(--card);
+  --color-raised: var(--raised);
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* z-index : 10 contenu épinglé, 40 nav, 60 grain. */
+
+html {
+  overflow-x: clip;
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  overflow-x: clip;
+}
+html,
+body,
+.tone {
+  transition:
+    background-color 0.9s var(--spring),
+    color 0.9s var(--spring),
+    border-color 0.9s var(--spring),
+    box-shadow 0.9s var(--spring);
+}
+
+::selection {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 3px;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+/* Grain fixe, jamais sur un conteneur qui défile. */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Bouton principal : l'inverse du fond, comme dans l'app. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 3rem;
+  padding-inline: 1.375rem;
+  border-radius: 999px;
+  background: var(--fg);
+  color: var(--bg);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  white-space: nowrap;
+  transition:
+    transform 0.5s var(--spring),
+    background-color 0.9s var(--spring),
+    color 0.9s var(--spring);
+}
+.btn:hover {
+  transform: translateY(-1px);
+}
+.btn:active {
+  transform: scale(0.98);
+}
+/* Le texte roule au survol : il sort par le haut, sa copie arrive par le bas. */
+.roll {
+  display: inline-block;
+  overflow: hidden;
+  height: 1.25em;
+  line-height: 1.25;
+}
+.roll-track {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.6s var(--spring);
+}
+.btn:hover .roll-track,
+.btn:focus-visible .roll-track {
+  transform: translateY(-50%);
+}
+.btn-arrow {
+  transition: transform 0.6s var(--spring);
+}
+.btn:hover .btn-arrow {
+  transform: translateX(3px);
+}
+/* Bouton de la nav : la flèche se glisse dans le bouton au survol. */
+.btn-grow {
+  gap: 0;
+}
+.btn-grow-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition:
+    width 0.5s var(--spring),
+    margin 0.5s var(--spring),
+    opacity 0.3s var(--spring);
+}
+.btn-grow:hover .btn-grow-icon,
+.btn-grow:focus-visible .btn-grow-icon {
+  width: 1em;
+  margin-left: 0.4rem;
+  opacity: 1;
+}
+.btn[disabled] {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+}
+.reduced .reveal,
+.no-js .reveal {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html,
+  body,
+  .tone,
+  .btn,
+  .roll-track,
+  .btn-arrow,
+  .btn-grow-icon {
+    transition: none;
+  }
+}

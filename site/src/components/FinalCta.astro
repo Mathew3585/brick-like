@@ -1,0 +1,18 @@
+---
+import WaitlistForm from './WaitlistForm.astro';
+
+/** L'inscription : la page repasse au papier, comme l'app quand la session se termine. */
+---
+
+<section id="liste" data-tone-section="light" class="relative mx-auto flex min-h-[100dvh] max-w-[1240px] flex-col items-center justify-center px-4 py-28 text-center md:px-8">
+  <h2 class="text-[clamp(3rem,9vw,7.5rem)] leading-[0.95] font-medium tracking-[-0.05em]">
+    <span class="block overflow-hidden pb-[0.08em]"><span data-final-word class="block">Sois parmi</span></span>
+    <span class="block overflow-hidden pb-[0.08em]"><span data-final-word class="block text-muted">les premiers.</span></span>
+  </h2>
+  <p class="reveal mt-8 max-w-[40ch] text-lg leading-relaxed text-muted">
+    Socle arrive bientôt sur Android. Laisse ton e-mail, on te prévient le jour de la sortie.
+  </p>
+  <div class="reveal mt-10 flex w-full justify-center text-left">
+    <WaitlistForm id="email-final" />
+  </div>
+</section>

@@ -1,0 +1,14 @@
+---
+/** Texte de bouton qui « roule » au survol : il sort par le haut, sa copie arrive par le bas. */
+interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+---
+
+<span class="roll" data-label>
+  <span class="roll-track">
+    <span>{text}</span>
+    <span aria-hidden="true">{text}</span>
+  </span>
+</span>

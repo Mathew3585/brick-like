@@ -1,0 +1,129 @@
+---
+import { Icon } from 'astro-icon/components';
+
+/**
+ * Ce que Socle rend, moment par moment. La grande carte joue sa vidéo ; quand elle se termine, la
+ * suivante prend sa place (scripts/benefits.ts). Vidéos Pixabay, licence libre (voir README).
+ */
+const items = [
+  {
+    id: 'travail',
+    icon: 'ph:target',
+    title: 'Du travail qui avance.',
+    body: "Une heure sans interruption fait plus qu'une journée hachée. Tu finis ce que tu commences.",
+    focus: '50% 50%',
+  },
+  {
+    id: 'famille',
+    icon: 'ph:users-three',
+    title: 'Du temps pour les tiens.',
+    body: 'Le téléphone reste sur le Socle, toi avec eux. Tu écoutes vraiment, et les moments durent.',
+    focus: '50% 50%',
+  },
+  {
+    id: 'lecture',
+    icon: 'ph:book-open-text',
+    title: 'Lire pour de vrai.',
+    body: 'Un chapitre, puis un autre. Ta liseuse reste ouverte, tout le reste se tait.',
+    focus: '50% 50%',
+  },
+];
+const slots = ['big', 'top', 'bot'];
+---
+
+<section id="modes" class="mx-auto max-w-[1240px] px-4 py-28 md:px-8 md:py-40">
+  <h2 class="reveal max-w-[16ch] text-[clamp(2.4rem,5.4vw,4.5rem)] leading-[1] font-medium tracking-[-0.045em]">Ce que tu récupères.</h2>
+  <p class="reveal mt-6 max-w-[48ch] text-lg leading-relaxed text-muted">
+    Chaque mode coupe les apps qui te volent un moment précis. Le temps qu'elles prenaient te revient.
+  </p>
+
+  <div data-benefits class="benefits reveal mt-16 grid gap-3">
+    {
+      items.map((it, i) => (
+        <article data-benefit={it.id} data-slot={slots[i]} class="benefit relative overflow-hidden rounded-[28px] bg-[#121214] text-[#F4F4F2]">
+          <video
+            class="absolute inset-0 size-full object-cover"
+            style={`object-position:${it.focus}`}
+            src={`/videos/${it.id}.mp4`}
+            poster={`/videos/${it.id}.jpg`}
+            muted
+            playsinline
+            preload="none"
+            aria-hidden="true"
+          />
+          <div class="benefit-shade absolute inset-0" />
+          <button type="button" class="benefit-hit absolute inset-0" aria-label={`Voir : ${it.title}`} />
+          <div class="relative flex h-full flex-col justify-between p-7 md:p-9">
+            <Icon name={it.icon} class="self-end text-2xl" />
+            <div>
+              <h3 class="benefit-title font-medium">{it.title}</h3>
+              <p class="benefit-body mt-3 max-w-[40ch] leading-relaxed text-white/75">{it.body}</p>
+            </div>
+          </div>
+        </article>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .benefits {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'big' 'top' 'bot';
+  }
+  @media (min-width: 1024px) {
+    .benefits {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      grid-template-rows: repeat(2, minmax(290px, auto));
+      grid-template-areas:
+        'big big big big top top'
+        'big big big big bot bot';
+    }
+  }
+  .benefit {
+    container-type: inline-size;
+    min-height: 290px;
+  }
+  .benefit[data-slot='big'] {
+    grid-area: big;
+    min-height: 460px;
+  }
+  .benefit[data-slot='top'] {
+    grid-area: top;
+  }
+  .benefit[data-slot='bot'] {
+    grid-area: bot;
+  }
+  /* Le texte suit la taille de la carte, grande ou petite. */
+  .benefit-title {
+    font-size: clamp(1.75rem, 7.5cqw, 3.75rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    max-width: 14ch;
+  }
+  .benefit-body {
+    font-size: clamp(0.9375rem, 2.2cqw, 1.125rem);
+  }
+  .benefit-shade {
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, transparent 30%),
+      linear-gradient(0deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.35) 45%, transparent 75%);
+    transition: background-color 0.6s var(--spring);
+  }
+  /* Les petites cartes restent plus sombres : la grande est celle qu'on regarde. */
+  .benefit:not([data-slot='big']) .benefit-shade {
+    background-color: rgba(0, 0, 0, 0.35);
+  }
+  .benefit-hit {
+    cursor: pointer;
+    z-index: 1;
+  }
+  .benefit[data-slot='big'] .benefit-hit {
+    cursor: default;
+  }
+  .benefit-hit:focus-visible {
+    outline: 2px solid #f4f4f2;
+    outline-offset: -4px;
+    border-radius: 28px;
+  }
+</style>

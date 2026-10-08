@@ -1,0 +1,82 @@
+---
+/**
+ * Cadre de téléphone. Les écrans sont posés les uns sur les autres dans le slot ; on passe de l'un
+ * à l'autre en jouant sur leur opacité. Tout l'intérieur est en `em`, calé sur la largeur du cadre
+ * (unités de conteneur), donc le téléphone garde ses proportions à n'importe quelle taille.
+ *
+ * L'épaisseur vient d'une pile de couches derrière la face, en 3D CSS : de face on ne la voit pas,
+ * dès que le téléphone penche ou se couche, sa tranche apparaît. Les parents qui le font pivoter
+ * doivent garder `transform-style: preserve-3d`.
+ */
+interface Props {
+  class?: string;
+  label: string;
+}
+const { class: cls = '', label } = Astro.props;
+const LAYERS = 14;
+---
+
+<div class:list={['phone', cls]} role="img" aria-label={label}>
+  {Array.from({ length: LAYERS }, (_, i) => <span class="phone-layer" style={`--i:${i + 1}`} aria-hidden="true" />)}
+  <div class="phone-face">
+    <div class="phone-screen">
+      <slot />
+      <span class="phone-island" aria-hidden="true"></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .phone {
+    --r: calc(var(--w, 300px) * 0.16);
+    /* Épaisseur totale : environ 10 % de la largeur, comme un vrai téléphone. */
+    --step: calc(var(--w, 300px) * 0.0072);
+    position: relative;
+    width: var(--w, 300px);
+    aspect-ratio: 9 / 19.5;
+    transform-style: preserve-3d;
+  }
+  .phone-face {
+    position: absolute;
+    inset: 0;
+    padding: 2.6%;
+    border-radius: var(--r);
+    background: linear-gradient(160deg, #2a2a2d, #0d0d0f 40%, #1b1b1e);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  }
+  /* La tranche : à peine plus claire près de la face, presque noire vers le dos. */
+  .phone-layer {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--r);
+    transform: translateZ(calc(var(--step) * var(--i) * -1));
+    background: color-mix(in srgb, #26262a calc(100% - var(--i) * 6.5%), #08080a);
+  }
+  .phone-screen {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    border-radius: calc(var(--w, 300px) * 0.135);
+    container-type: inline-size;
+    background: #050505;
+    isolation: isolate;
+  }
+  .phone-island {
+    position: absolute;
+    top: 2.4%;
+    left: 50%;
+    width: 30%;
+    height: 3.4%;
+    translate: -50% 0;
+    border-radius: 999px;
+    background: #000;
+    z-index: 5;
+  }
+  .phone-screen :global(.screen) {
+    position: absolute;
+    inset: 0;
+    --pt: calc(100cqw / 390);
+  }
+</style>

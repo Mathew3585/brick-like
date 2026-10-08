@@ -1,0 +1,84 @@
+---
+/**
+ * Le Socle tel que l'app le dessine dans ses écrans (components/Puck.tsx) : un palet noir mat éclairé en haut à
+ * gauche, un anneau creusé et une LED d'état. Le même dans les deux tons : c'est un objet, pas de l'UI.
+ */
+interface Props {
+  id: string;
+  class?: string;
+  style?: string;
+  /** "blink" attend une puce, "on" vient d'en lire une. */
+  led?: 'blink' | 'on';
+}
+const { id, class: cls = '', style, led = 'blink' } = Astro.props;
+---
+
+<div class:list={['puck relative', cls]} style={style} data-led={led}>
+  <svg viewBox="0 0 100 112" class="block h-auto w-full overflow-visible" aria-hidden="true">
+    <defs>
+      <radialGradient id={`${id}-body`} cx="35%" cy="30%" r="75%">
+        <stop offset="0" stop-color="#3A3A3D"></stop>
+        <stop offset=".55" stop-color="#111113"></stop>
+        <stop offset="1" stop-color="#050505"></stop>
+      </radialGradient>
+      <radialGradient id={`${id}-drop`} cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#000" stop-opacity=".38"></stop>
+        <stop offset="1" stop-color="#000" stop-opacity="0"></stop>
+      </radialGradient>
+      <linearGradient id={`${id}-rim`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#FFF" stop-opacity=".16"></stop>
+        <stop offset=".5" stop-color="#FFF" stop-opacity="0"></stop>
+      </linearGradient>
+      <linearGradient id={`${id}-well`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#000" stop-opacity=".55"></stop>
+        <stop offset=".6" stop-color="#000" stop-opacity="0"></stop>
+      </linearGradient>
+      <linearGradient id={`${id}-base`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset=".6" stop-color="#000" stop-opacity="0"></stop>
+        <stop offset="1" stop-color="#000" stop-opacity=".5"></stop>
+      </linearGradient>
+    </defs>
+    <ellipse cx="50" cy="66" rx="45" ry="41" fill={`url(#${id}-drop)`}></ellipse>
+    <circle cx="50" cy="50" r="49" fill={`url(#${id}-body)`}></circle>
+    <circle cx="50" cy="50" r="49" fill={`url(#${id}-base)`}></circle>
+    <circle cx="50" cy="50" r="48.5" fill="none" stroke={`url(#${id}-rim)`} stroke-width="1"></circle>
+    <circle cx="50" cy="50" r="28" fill={`url(#${id}-well)`}></circle>
+    <circle cx="50" cy="50" r="28" fill="none" stroke="#FFF" stroke-opacity=".1" stroke-width=".6"></circle>
+    <g font-family="Geist Mono Variable, ui-monospace, monospace" font-weight="500" font-size="8.5" letter-spacing="2.55" text-anchor="middle">
+      <text x="51.3" y="53.9" fill="#FFF" fill-opacity=".09">SOCLE</text>
+      <text x="51.3" y="53.1" fill="#000" fill-opacity=".75">SOCLE</text>
+    </g>
+  </svg>
+  <span class="puck-led" aria-hidden="true"><span></span></span>
+</div>
+
+<style>
+  .puck-led {
+    position: absolute;
+    left: 50%;
+    top: 11%;
+    width: 14%;
+    aspect-ratio: 1;
+    translate: -50% -50%;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.28) 0 18%, rgba(255, 255, 255, 0.12) 19% 40%, transparent 41%);
+  }
+  .puck-led span {
+    width: 25%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #f4f4f2;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    [data-led="blink"] .puck-led {
+      animation: led 3s var(--spring) infinite;
+    }
+  }
+  @keyframes led {
+    50% {
+      opacity: 0.25;
+    }
+  }
+</style>

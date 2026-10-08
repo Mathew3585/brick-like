@@ -1,0 +1,37 @@
+---
+import { Icon } from 'astro-icon/components';
+import Phone from './Phone.astro';
+import ShieldScreen from './screens/ShieldScreen.astro';
+
+const facts = [
+  { icon: 'ph:hand-tap', title: 'Chaque tentative est comptée.', body: 'Tu vois dans tes stats quelles apps tu as essayé d’ouvrir, et combien de fois.' },
+  { icon: 'ph:bell-slash', title: 'Les notifications aussi.', body: 'Celles des apps en pause sont retirées pendant la session. Rien ne te rappelle.' },
+];
+---
+
+<section class="mx-auto grid max-w-[1240px] items-center gap-14 px-4 pt-16 pb-28 md:px-8 md:pt-24 md:pb-40 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
+  <div class="reveal flex justify-center lg:justify-start">
+    <Phone label="Écran de blocage : Instagram est en pause" class="[--w:min(300px,72vw)]">
+      <ShieldScreen />
+    </Phone>
+  </div>
+  <div>
+    <h2 class="reveal max-w-[16ch] text-[clamp(2.2rem,4.6vw,3.8rem)] leading-[1.02] font-medium tracking-[-0.04em]">
+      Tu peux essayer d'ouvrir Instagram.
+    </h2>
+    <p class="reveal mt-6 max-w-[44ch] text-lg leading-relaxed text-muted">
+      Un écran noir apparaît avant même que l’app charge. Pas de bouton « encore cinq minutes ». Le seul chemin passe par le Socle.
+    </p>
+    <div class="mt-14 grid gap-10 sm:grid-cols-2">
+      {
+        facts.map((f) => (
+          <div class="reveal">
+            <Icon name={f.icon} class="text-2xl" />
+            <p class="mt-4 font-medium">{f.title}</p>
+            <p class="mt-1.5 text-[0.9375rem] leading-relaxed text-muted">{f.body}</p>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

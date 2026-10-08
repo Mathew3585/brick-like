@@ -1,0 +1,110 @@
+---
+import { Icon } from 'astro-icon/components';
+import Roll from './Roll.astro';
+
+const links = [
+  { href: '#fonctionnement', label: 'Comment ça marche' },
+  { href: '#modes', label: 'Pourquoi' },
+  { href: '#objet', label: 'Le Socle' },
+  { href: '#faq', label: 'Questions' },
+];
+---
+
+<header data-nav class="pointer-events-none fixed inset-x-0 top-0 z-40 flex justify-center px-4 pt-4">
+  <nav
+    class="tone nav-glass pointer-events-auto grid h-14 w-full max-w-[760px] grid-cols-[1fr_auto] items-center gap-4 rounded-full pr-2 pl-4 text-sm md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
+    aria-label="Navigation principale">
+    <a href="#top" class="justify-self-start text-base font-semibold tracking-[-0.03em]">Socle</a>
+    <ul data-nav-links class="relative hidden items-center text-muted md:flex">
+      <span data-nav-pill class="nav-pill" aria-hidden="true"></span>
+      {
+        links.map((l) => (
+          <li>
+            <a href={l.href} class="relative block rounded-full px-3 py-1.5 transition-colors duration-300 hover:text-fg">
+              {l.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <a href="#liste" class="btn btn-grow h-10! justify-self-end px-4! text-sm!">
+      <Roll text="Rejoindre la liste" />
+      <span class="btn-grow-icon" aria-hidden="true"><Icon name="ph:arrow-right-bold" /></span>
+    </a>
+  </nav>
+</header>
+
+<style>
+  .nav-glass {
+    background: color-mix(in srgb, var(--bg) 72%, transparent);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    box-shadow:
+      inset 0 0 0 1px var(--line),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+  /*
+    Cachée tout en haut de la page (le hero a déjà son formulaire), elle s'ouvre depuis le centre
+    vers les deux côtés dès qu'on descend. scripts/motion.ts ajoute .is-shown. Sans JS, toujours là.
+  */
+  .nav-glass {
+    transition:
+      clip-path 0.9s var(--spring),
+      opacity 0.4s var(--spring),
+      background-color 0.9s var(--spring),
+      color 0.9s var(--spring);
+  }
+  .nav-glass > * {
+    transition: opacity 0.5s var(--spring) 0.25s;
+  }
+  :global(html:not(.no-js)) [data-nav]:not(.is-shown) .nav-glass {
+    clip-path: inset(0 50% 0 50% round 999px);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      clip-path 0.6s var(--spring),
+      opacity 0.3s var(--spring) 0.3s;
+  }
+  :global(html:not(.no-js)) [data-nav]:not(.is-shown) .nav-glass > * {
+    opacity: 0;
+    transition-delay: 0s;
+  }
+  .nav-glass {
+    clip-path: inset(0 0 0 0 round 999px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nav-glass,
+    .nav-glass > * {
+      transition: none !important;
+    }
+  }
+  /* Pastille qui glisse sous le lien survolé (placée par scripts/motion.ts). */
+  .nav-pill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: var(--pw, 0px);
+    translate: var(--px, 0px) 0;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--fg) 7%, transparent);
+    opacity: 0;
+    transition:
+      translate 0.5s var(--spring),
+      width 0.5s var(--spring),
+      opacity 0.3s var(--spring);
+    pointer-events: none;
+  }
+  .nav-pill.is-on {
+    opacity: 1;
+  }
+  .nav-pill.is-jump {
+    transition: opacity 0.3s var(--spring);
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .nav-glass {
+      background: var(--bg);
+      backdrop-filter: none;
+    }
+  }
+</style>

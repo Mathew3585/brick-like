@@ -1,0 +1,83 @@
+---
+import { Icon } from 'astro-icon/components';
+import StatusBar from './StatusBar.astro';
+import Puck from '../Puck.astro';
+import { pt } from './pt';
+
+/**
+ * L'accueil de l'app (components/home/HomeView.tsx), en papier : la date, le Socle dans ses deux
+ * anneaux, le mode, la durée. La barre d'onglets est l'îlot d'encre flottant.
+ */
+interface Props {
+  id: string;
+  class?: string;
+}
+const { id, class: cls = '' } = Astro.props;
+const modes = ['Travail', 'Lecture', 'Soir'];
+const tabs = [
+  { icon: 'ph:house', on: true },
+  { icon: 'ph:stack-light' },
+  { icon: 'ph:chart-bar-light' },
+  { icon: 'ph:disc-light' },
+];
+---
+
+<div class:list={['screen flex flex-col items-center bg-[#FAFAF9] text-[#0A0A0A]', cls]} data-screen="home" style={`padding:${pt(65)} ${pt(22)} ${pt(154)}`}>
+  <StatusBar />
+  <p class="self-stretch font-mono text-[#86868B] uppercase" style={`font-size:${pt(10.5)};letter-spacing:${pt(1.6)}`}>Jeudi 8 octobre</p>
+
+  <div class="flex flex-1 items-center justify-center">
+    <div class="orb relative grid place-items-center" style={`width:${pt(290)};height:${pt(290)}`}>
+      <span class="orb-breath absolute inset-0 rounded-full border border-black/[0.08]"></span>
+      <span class="absolute rounded-full border border-black/[0.08]" style="inset:14%"></span>
+      <Puck id={`${id}-puck`} class="relative" style={`width:${pt(168)};margin-top:${pt(20)}`} />
+    </div>
+  </div>
+
+  <div class="flex flex-col items-center" style={`gap:${pt(10)};padding-bottom:${pt(18)}`}>
+    <span class="flex items-center" style={`gap:${pt(8)};padding:${pt(6)} ${pt(14)}`}>
+      <span class="relative grid font-semibold tracking-[-0.03em]" style={`font-size:${pt(28)}`} data-mode-name>
+        {
+          modes.map((m, i) => (
+            <span class:list={['col-start-1 row-start-1 text-center', i > 0 && 'opacity-0']} data-mode={i}>
+              {m}
+            </span>
+          ))
+        }
+      </span>
+      <Icon name="ph:caret-down" class="text-[#86868B]" style={`font-size:${pt(16)}`} />
+    </span>
+    <span class="flex items-center rounded-full border border-black/[0.08]" style={`gap:${pt(6)};padding:${pt(7)} ${pt(14)};margin-top:${pt(-4)}`}>
+      <span class="font-mono" style={`font-size:${pt(13)}`}>50 min</span>
+      <Icon name="ph:caret-down" class="text-[#86868B]" style={`font-size:${pt(12)}`} />
+    </span>
+    <span class="text-[#86868B]" style={`font-size:${pt(14)}`}>Touche le Socle</span>
+  </div>
+
+  <div class="absolute inset-x-0 flex justify-center" style={`bottom:${pt(48)}`}>
+    <div class="relative flex rounded-full bg-[#0A0A0A]" style={`width:${pt(268)};padding:${pt(6)}`}>
+      {
+        tabs.map((t) => (
+          <span class="relative grid flex-1 place-items-center" style={`height:${pt(46)}`}>
+            {t.on && <span class="absolute rounded-full bg-[#FAFAF9]" style={`width:${pt(46)};height:${pt(46)}`} />}
+            <Icon name={t.icon} class:list={['relative', t.on ? 'text-[#0A0A0A]' : 'text-[#FAFAF9] opacity-70']} style={`font-size:${pt(21)}`} />
+          </span>
+        ))
+      }
+    </div>
+  </div>
+</div>
+
+<style>
+  @media (prefers-reduced-motion: no-preference) {
+    .orb-breath {
+      animation: breath 4.8s var(--spring) infinite;
+    }
+  }
+  @keyframes breath {
+    50% {
+      transform: scale(1.04);
+      opacity: 0.55;
+    }
+  }
+</style>

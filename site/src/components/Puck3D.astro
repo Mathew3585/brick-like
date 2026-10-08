@@ -1,0 +1,27 @@
+---
+/** Emplacement d'un Socle 3D, rendu par scripts/puck3d.ts. */
+interface Props {
+  id: string;
+  class?: string;
+  /** Part de la largeur occupée par le diamètre du palet. */
+  fit?: number;
+  /** Élévation de la caméra en degrés. */
+  elev?: number;
+  led?: 'blink' | 'on';
+}
+const { id, class: cls = '', fit = 0.8, elev = 28, led = 'blink' } = Astro.props;
+---
+
+<div class:list={['puck3d relative', cls]} data-puck3d={id} data-fit={fit} data-elev={elev} data-led={led}>
+  <canvas class="absolute inset-0 size-full" aria-hidden="true"></canvas>
+</div>
+
+<style>
+  .puck3d canvas {
+    opacity: 0;
+    transition: opacity 0.8s var(--spring);
+  }
+  .puck3d[data-ready] canvas {
+    opacity: 1;
+  }
+</style>

@@ -31,7 +31,6 @@ export const blocker = {
   isEnabled: () => Native?.isBlockerEnabled() ?? true,
   openSettings: () => Native?.openBlockerSettings(),
   openAppDetails: () => Native?.openAppDetails(),
-  ringerNormal: () => Native?.isRingerNormal() ?? true,
   notifyEnabled: () => Native?.isNotifyEnabled() ?? true,
   openNotifySettings: () => Native?.openNotifySettings(),
 

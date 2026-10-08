@@ -58,12 +58,6 @@ class SocleBlockerModule : Module() {
       )
     }
 
-    /** False in silent or vibrate mode: the lock/unlock sounds stay quiet then. */
-    Function("isRingerNormal") {
-      val audio = context.getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
-      audio.ringerMode == android.media.AudioManager.RINGER_MODE_NORMAL
-    }
-
     // --- Installed apps ---
 
     AsyncFunction("getInstalledApps") { iconSize: Int ->

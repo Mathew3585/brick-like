@@ -1,0 +1,38 @@
+---
+import { Icon } from 'astro-icon/components';
+import Roll from './Roll.astro';
+
+/** Formulaire de liste d'attente. Le comportement est dans scripts/waitlist.ts. */
+interface Props {
+  id: string;
+  class?: string;
+}
+const { id, class: cls = '' } = Astro.props;
+---
+
+<form data-waitlist class:list={['w-full max-w-[440px]', cls]} novalidate>
+  <label for={id} class="text-sm font-medium">Ton adresse e-mail</label>
+  <div data-row class="tone mt-2 flex h-14 items-center gap-2 rounded-full bg-raised p-1.5 pl-5 shadow-[inset_0_0_0_1px_var(--line)] focus-within:shadow-[inset_0_0_0_1.5px_var(--fg)]">
+    <input
+      id={id}
+      name="email"
+      type="email"
+      autocomplete="email"
+      inputmode="email"
+      required
+      placeholder="prenom@exemple.fr"
+      aria-describedby={`${id}-msg`}
+      class="min-w-0 flex-1 bg-transparent text-[0.9375rem] outline-none placeholder:text-muted"
+    />
+    <button type="submit" class="btn h-11!">
+      <Roll text="Rejoindre la liste" />
+      <Icon name="ph:arrow-right-bold" data-arrow class="btn-arrow" />
+      <Icon name="ph:circle-notch-bold" data-spin class="hidden animate-spin" />
+    </button>
+  </div>
+  <p id={`${id}-msg`} data-msg aria-live="polite" class="mt-2.5 min-h-[1.25rem] text-sm text-muted">Un seul e-mail, le jour de la sortie. Rien d'autre.</p>
+  <div data-done hidden class="tone mt-2 flex h-14 items-center gap-3 rounded-full bg-card px-5 text-[0.9375rem]">
+    <Icon name="ph:check-circle-fill" class="text-xl" />
+    <span>C'est noté. On t'écrit à la sortie.</span>
+  </div>
+</form>

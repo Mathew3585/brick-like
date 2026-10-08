@@ -1,0 +1,24 @@
+---
+import { Icon } from 'astro-icon/components';
+import { pt } from './pt';
+
+/** L'écran natif qui recouvre une app en pause (ShieldActivity.kt). */
+interface Props {
+  class?: string;
+}
+const { class: cls = '' } = Astro.props;
+---
+
+<div class:list={['screen flex flex-col items-center justify-center bg-black text-[#F4F4F2]', cls]} data-screen="shield" style={`padding:0 ${pt(32)}`}>
+  <span class="grid place-items-center border border-white/15 bg-[#121214]" style={`width:${pt(88)};height:${pt(88)};border-radius:${pt(26)}`}>
+    <Icon name="ph:instagram-logo" style={`font-size:${pt(48)}`} />
+  </span>
+  <p class="text-center font-semibold" style={`font-size:${pt(26)};letter-spacing:-0.04em;margin-top:${pt(30)}`}>Instagram est en pause</p>
+  <p class="text-center text-[#8A8A8F]" style={`font-size:${pt(15)};margin-top:${pt(10)}`}>Tu es concentré depuis</p>
+  <p class="text-center font-mono tabular-nums" style={`font-size:${pt(34)};letter-spacing:-0.04em;margin-top:${pt(4)}`} data-clock="4360">01:12:40</p>
+  <p class="text-center text-[#8A8A8F]" style={`font-size:${pt(14)};line-height:1.4;margin-top:${pt(18)}`}>
+    Le Socle t'attend. Pour récupérer tes apps,<br />repose ton téléphone dessus.
+  </p>
+  <span class="grid w-full place-items-center rounded-full bg-[#F4F4F2] font-semibold text-[#0A0A0A]" style={`height:${pt(58)};font-size:${pt(16)};margin-top:${pt(44)}`}>Revenir au calme</span>
+  <p class="absolute inset-x-0 text-center font-mono text-[#55555A]" style={`bottom:${pt(40)};font-size:${pt(10)};letter-spacing:0.14em`}>SOCLE · MODE TRAVAIL</p>
+</div>

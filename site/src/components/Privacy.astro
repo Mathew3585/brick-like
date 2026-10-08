@@ -1,0 +1,63 @@
+---
+import { Icon } from 'astro-icon/components';
+
+/**
+ * Épinglée : les trois promesses passent l'une après l'autre au même endroit pendant le défilement
+ * (scripts/motion.ts). Sans animation, elles s'affichent à la suite.
+ */
+const points = [
+  { icon: 'ph:user-circle-dashed', title: 'Pas de compte.', body: "Pas d'inscription, pas de mot de passe. Tu ouvres l'app, tu poses ton téléphone." },
+  { icon: 'ph:cloud-slash', title: 'Pas de serveur.', body: 'Tes modes, tes sessions et tes stats ne quittent jamais ton téléphone.' },
+  { icon: 'ph:wifi-slash', title: 'Marche hors ligne.', body: 'Pas besoin de réseau : le blocage tient aussi en mode avion.' },
+];
+---
+
+<section data-privacy class="relative">
+  <div class="mx-auto flex min-h-[100dvh] max-w-[1240px] flex-col justify-center px-4 py-24 md:px-8">
+    <h2 class="max-w-[22ch] text-[clamp(1.5rem,2.6vw,2.25rem)] leading-[1.1] font-medium tracking-[-0.03em] text-muted">
+      Tout reste sur ton téléphone. On ne sait pas ce que tu bloques, et c'est voulu.
+    </h2>
+
+    <div class="privacy-stack mt-12 grid md:mt-16">
+      {
+        points.map((p, i) => (
+          <div data-point={i} class="privacy-point col-start-1 row-start-1 grid items-center gap-6 md:grid-cols-[auto_1fr] md:gap-12">
+            <span data-point-icon class="tone grid size-20 place-items-center rounded-full bg-card text-4xl md:size-32 md:text-6xl">
+              <Icon name={p.icon} />
+            </span>
+            <div>
+              <p class="overflow-hidden pb-[0.1em] text-[clamp(2.75rem,8.5vw,7.5rem)] leading-[0.95] font-medium tracking-[-0.05em]">
+                <span data-point-title class="block">{p.title}</span>
+              </p>
+              <p data-point-body class="mt-5 max-w-[42ch] text-lg leading-relaxed text-muted md:text-xl">{p.body}</p>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="privacy-progress mt-14 flex max-w-[240px] gap-2" aria-hidden="true">
+      {points.map(() => <span class="tone h-0.5 flex-1 overflow-hidden rounded-full bg-line"><span data-point-bar class="block h-full origin-left scale-x-0 bg-fg" /></span>)}
+    </div>
+  </div>
+</section>
+
+<style>
+  .privacy-point:not([data-point="0"]) {
+    opacity: 0;
+  }
+  /* Sans animation : les trois à la suite, sans barre de progression. */
+  :global(.reduced) .privacy-stack,
+  :global(.no-js) .privacy-stack {
+    gap: 3.5rem;
+  }
+  :global(.reduced) .privacy-point,
+  :global(.no-js) .privacy-point {
+    grid-row: auto;
+    opacity: 1 !important;
+  }
+  :global(.reduced) .privacy-progress,
+  :global(.no-js) .privacy-progress {
+    display: none;
+  }
+</style>

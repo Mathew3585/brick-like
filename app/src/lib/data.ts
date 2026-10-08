@@ -28,7 +28,7 @@ export type Settings = {
   sosMonth: string;
   sosUsed: number;
   lastModeId: string;
-  /** Lock and unlock sounds (always quiet in silent mode). */
+  /** Lock and unlock sounds, on the media volume. */
   sounds?: boolean;
 };
 

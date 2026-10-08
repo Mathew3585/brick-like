@@ -1,0 +1,43 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const {
+  title = 'Socle : pose ton téléphone, reprends ton temps',
+  description = "Pose ton téléphone sur le Socle, les apps qui te distraient se mettent en pause. Pour les récupérer, il faut revenir au Socle. Inscris-toi à la liste d'attente.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="fr" data-tone="light" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#FAFAF9" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content="fr_FR" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script is:inline>
+      document.documentElement.classList.remove('no-js');
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('reduced');
+    </script>
+  </head>
+  <body>
+    <slot />
+    <div class="grain" aria-hidden="true"></div>
+    <script>
+      import '../scripts/motion';
+      import '../scripts/waitlist';
+      import '../scripts/benefits';
+    </script>
+  </body>
+</html>

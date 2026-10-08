@@ -11,7 +11,6 @@ type SocleBlockerNative = {
   isNotifyEnabled(): boolean;
   openNotifySettings(): void;
   openAppDetails(): void;
-  isRingerNormal(): boolean;
   getInstalledApps(iconSize: number): Promise<InstalledApp[]>;
   startSession(mode: string, blocked: string[], startedAt: number): void;
   stopSession(): { attempts: Counts; muted: Counts };

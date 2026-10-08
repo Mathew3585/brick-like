@@ -1,0 +1,13 @@
+---
+import { Icon } from 'astro-icon/components';
+import { pt } from './pt';
+---
+
+<div class="absolute inset-x-0 top-0 flex items-center justify-between font-medium" style={`padding:${pt(16)} ${pt(30)} 0;font-size:${pt(14)}`}>
+  <span class="font-mono">9:41</span>
+  <span class="flex items-center" style={`gap:${pt(5)}`}>
+    <Icon name="ph:cell-signal-full-fill" />
+    <Icon name="ph:wifi-high-bold" />
+    <Icon name="ph:battery-full-fill" style={`font-size:${pt(17)}`} />
+  </span>
+</div>

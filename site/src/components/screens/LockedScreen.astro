@@ -1,0 +1,65 @@
+---
+import { Icon } from 'astro-icon/components';
+import StatusBar from './StatusBar.astro';
+import Puck from '../Puck.astro';
+import { pt } from './pt';
+
+/**
+ * Session en cours (components/home/LockedView.tsx), en encre : le Socle dans l'anneau qui se
+ * remplit vers l'objectif, le chrono dessous. `[data-clock]` et `[data-ring]` sont animés côté client.
+ */
+interface Props {
+  id: string;
+  class?: string;
+  /** Secondes déjà écoulées au départ. */
+  start?: number;
+  /** Objectif de la session, en minutes. */
+  goal?: number;
+}
+const { id, class: cls = '', start = 0, goal = 50 } = Astro.props;
+const fmt = (s: number) => [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60].map((n) => String(n).padStart(2, '0')).join(':');
+const R = 144; // anneau de 290 pt, trait de 2
+const C = 2 * Math.PI * R;
+const progress = Math.min(1, start / (goal * 60));
+---
+
+<div class:list={['screen flex flex-col items-center bg-[#050505] text-[#F4F4F2]', cls]} data-screen="locked" style={`padding:${pt(65)} ${pt(22)} ${pt(54)}`}>
+  <StatusBar />
+  <div class="flex justify-between self-stretch font-mono text-[#77777C] uppercase" style={`font-size:${pt(10.5)};letter-spacing:${pt(1.6)}`}>
+    <span>Session · Travail</span>
+    <span>10 apps en pause</span>
+  </div>
+
+  <div class="flex flex-1 flex-col items-center justify-center">
+    <div class="relative grid place-items-center" style={`width:${pt(290)};height:${pt(290)}`}>
+      <span class="absolute rounded-full bg-[radial-gradient(closest-side,rgba(255,255,255,0.08),transparent)]" style={`width:${pt(406)};height:${pt(406)}`}></span>
+      <svg viewBox="0 0 290 290" class="absolute inset-0 size-full -rotate-90" aria-hidden="true">
+        <circle cx="145" cy="145" r={R} fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="2"></circle>
+        <circle
+          cx="145"
+          cy="145"
+          r={R}
+          fill="none"
+          stroke="#F4F4F2"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-dasharray={C}
+          stroke-dashoffset={C * (1 - Math.max(0.004, progress))}
+          data-ring={goal * 60}></circle>
+      </svg>
+      <Puck id={`${id}-puck`} class="relative" style={`width:${pt(158)};margin-top:${pt(19)}`} led="on" />
+    </div>
+    <p class="font-mono font-light tabular-nums" style={`font-size:${pt(48)};letter-spacing:${pt(-2.8)};margin-top:${pt(26)}`} data-clock={start}>{fmt(start)}</p>
+    <p class="text-[#77777C]" style={`font-size:${pt(14)};margin-top:${pt(6)}`}>sur {goal} min</p>
+  </div>
+
+  <div class="self-stretch">
+    <span class="flex items-center justify-between rounded-full bg-[#F4F4F2] text-[#050505]" style={`min-height:${pt(58)};padding:0 ${pt(8)} 0 ${pt(24)}`}>
+      <span class="font-medium" style={`font-size:${pt(16)}`}>Débloquer au Socle</span>
+      <span class="grid place-items-center rounded-full bg-[rgba(128,128,128,0.18)]" style={`width:${pt(42)};height:${pt(42)}`}>
+        <Icon name="ph:waveform-light" style={`font-size:${pt(19)}`} />
+      </span>
+    </span>
+    <p class="text-center text-[#77777C] underline" style={`font-size:${pt(12.5)};margin-top:${pt(20)}`}>Déblocage d’urgence · 3 restants</p>
+  </div>
+</div>
