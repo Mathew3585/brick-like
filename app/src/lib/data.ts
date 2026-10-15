@@ -73,7 +73,8 @@ export function reconcile() {
   const native = blocker.current();
   const mine = active.get();
   if (native && !mine) {
-    active.set({ modeId: settings.get().lastModeId, modeName: native.mode, startedAt: native.startedAt, blocked: native.blocked, goalMin: settings.get().goalMin });
+    const goalMin = native.goalAt ? Math.round((native.goalAt - native.startedAt) / 60_000) : 0;
+    active.set({ modeId: settings.get().lastModeId, modeName: native.mode, startedAt: native.startedAt, blocked: native.blocked, goalMin });
   } else if (!native && mine) {
     active.set(null);
   }
@@ -104,7 +105,7 @@ function touchSocle(tag: string) {
 export function startSession(mode: Mode, tag: string) {
   const startedAt = Date.now();
   const goalMin = settings.get().goalMin;
-  blocker.start(mode.name, mode.apps, startedAt);
+  blocker.start(mode.name, mode.apps, startedAt, goalMin ? startedAt + goalMin * 60_000 : 0);
   active.set({ modeId: mode.id, modeName: mode.name, startedAt, blocked: mode.apps, goalMin });
   void scheduleGoal(goalMin, mode.name);
   settings.set((s) => ({ ...s, lastModeId: mode.id }));

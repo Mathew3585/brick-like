@@ -14,6 +14,9 @@ class SocleAccessibilityService : AccessibilityService() {
   private var lastPkg: String? = null
   private var lastCountedAt = 0L
 
+  // After a reboot the system has dropped every notification: put the session timer back.
+  override fun onServiceConnected() = SessionNotification.show(this)
+
   override fun onAccessibilityEvent(event: AccessibilityEvent) {
     if (event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
     val pkg = event.packageName?.toString() ?: return

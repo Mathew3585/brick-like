@@ -16,6 +16,8 @@ object SessionStore {
     val startedAt: Long,
     val mode: String,
     val blocked: Set<String>,
+    /** When the goal is reached (epoch ms), 0 for a Libre session. */
+    val goalAt: Long,
   )
 
   private fun prefs(context: Context): SharedPreferences =
@@ -28,13 +30,15 @@ object SessionStore {
       startedAt = p.getLong("startedAt", 0L),
       mode = p.getString("mode", "") ?: "",
       blocked = p.getStringSet("blocked", emptySet()) ?: emptySet(),
+      goalAt = p.getLong("goalAt", 0L),
     )
   }
 
-  fun start(context: Context, mode: String, blocked: List<String>, startedAt: Long) {
+  fun start(context: Context, mode: String, blocked: List<String>, startedAt: Long, goalAt: Long) {
     prefs(context).edit()
       .putBoolean("active", true)
       .putLong("startedAt", startedAt)
+      .putLong("goalAt", goalAt)
       .putString("mode", mode)
       .putStringSet("blocked", HashSet(blocked))
       .putString("attempts", "{}")

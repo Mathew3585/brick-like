@@ -36,10 +36,13 @@ export const blocker = {
 
   installedApps: async (): Promise<InstalledApp[]> => (Native ? Native.getInstalledApps(96) : SAMPLE_APPS),
 
-  start(mode: string, blocked: string[], startedAt: number) {
-    if (Native) Native.startSession(mode, blocked, startedAt);
-    else simulated = { mode, blocked, startedAt, attempts: {}, muted: {} };
+  /** `goalAt` is when the goal is reached (epoch ms), 0 for Libre. */
+  start(mode: string, blocked: string[], startedAt: number, goalAt: number) {
+    if (Native) Native.startSession(mode, blocked, startedAt, goalAt);
+    else simulated = { mode, blocked, startedAt, goalAt, attempts: {}, muted: {} };
   },
+  /** The ongoing notification with the session timer; posted natively, this only re-posts it. */
+  showNotice: () => Native?.showSessionNotice(),
   stop(): { attempts: Record<string, number>; muted: Record<string, number> } {
     if (Native) return Native.stopSession();
     const result = { attempts: simulated?.attempts ?? {}, muted: simulated?.muted ?? {} };

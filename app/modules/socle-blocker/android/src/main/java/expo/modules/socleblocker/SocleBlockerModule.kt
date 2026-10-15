@@ -83,13 +83,20 @@ class SocleBlockerModule : Module() {
 
     // --- Session ---
 
-    Function("startSession") { mode: String, blocked: List<String>, startedAt: Double ->
-      SessionStore.start(context, mode, blocked, startedAt.toLong())
+    Function("startSession") { mode: String, blocked: List<String>, startedAt: Double, goalAt: Double ->
+      SessionStore.start(context, mode, blocked, startedAt.toLong(), goalAt.toLong())
       SocleNotificationListener.sweep()
+      SessionNotification.show(context)
     }
 
     Function("stopSession") {
+      SessionNotification.cancel(context)
       SessionStore.stop(context)
+    }
+
+    /** Posts the session notification again, e.g. once the notification permission was granted. */
+    Function("showSessionNotice") {
+      SessionNotification.show(context)
     }
 
     Function("getSession") {
@@ -100,6 +107,7 @@ class SocleBlockerModule : Module() {
         mapOf(
           "mode" to s.mode,
           "startedAt" to s.startedAt.toDouble(),
+          "goalAt" to s.goalAt.toDouble(),
           "blocked" to s.blocked.toList(),
           "attempts" to SessionStore.attempts(context),
           "muted" to SessionStore.muted(context),

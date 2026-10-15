@@ -1,5 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+import { blocker } from './blocker';
 
 /** Session lengths offered on Accueil. 0 = Libre: no target, the ring just turns. */
 export const DURATIONS = [25, 50, 90, 120, 0] as const;
@@ -21,13 +22,15 @@ const CHANNEL = 'goal';
 
 /**
  * When the target is reached the apps stay blocked: only the Socle ends a session.
- * This notification just tells the user it is time to go back to it.
+ * This notification just tells the user it is time to go back to it. The ongoing timer
+ * notification is native; it only needs the permission, asked here for Libre sessions too.
  */
 export async function scheduleGoal(minutes: number, mode: string) {
-  if (!minutes) return;
   try {
     const { granted } = await Notifications.requestPermissionsAsync();
     if (!granted) return;
+    blocker.showNotice();
+    if (!minutes) return;
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync(CHANNEL, { name: 'Objectif de session', importance: Notifications.AndroidImportance.HIGH });
     }
